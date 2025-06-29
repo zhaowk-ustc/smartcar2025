@@ -1,0 +1,16 @@
+program/nor_sdram_zf_dtcm/
+settings/
+project_config/settings/
+Debug/
+Debug_m0_plus/
+Debug_m7_0/
+Debug_m7_1/
+settings_m0/
+settings_m7_0/
+settings_m7_1/
+
+*.crun
+*.dbgdt
+*.ps1
+*.xcl
+*.reggroups
