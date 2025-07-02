@@ -27,27 +27,36 @@ void Debugger::execute_command(const string& command_line)
     if (cmd.action == "set")
     {
         set_debug_var(cmd.var_name, cmd.value);
-        debug_output_("Set " + cmd.var_name + " = " + cmd.value + "\n");
+        debug_output_("Set " + cmd.var_name + " = " + cmd.value);
     }
     else if (cmd.action == "get")
     {
         string value = get_debug_var(cmd.var_name);
-        debug_output_(cmd.var_name + " = " + value + "\n");
+        debug_output_(cmd.var_name + " = " + value);
     }
     else if (cmd.action == "help")
     {
         print_help();
+    }
+    else if (cmd.action == "list")
+    {
+        debug_output_("=== List of Debug Variables ===");
+        for (const auto& [name, var] : vars_)
+        {
+            debug_output_(name);
+        }
+        debug_output_("===============================");
     }
     else if (cmd.action == "watch")
     {
         if (!cmd.var_name.empty())
         {
             add_watch_var(cmd.var_name);
-            debug_output_("Added watch for: " + cmd.var_name + "\n");
+            debug_output_("Added watch for: " + cmd.var_name);
         }
         else
         {
-            debug_output_("Usage: watch <var_name>\n");
+            debug_output_("Usage: watch <var_name>");
         }
     }
     else if (cmd.action == "unwatch")
@@ -55,11 +64,11 @@ void Debugger::execute_command(const string& command_line)
         if (!cmd.var_name.empty())
         {
             remove_watch_var(cmd.var_name);
-            debug_output_("Removed watch for: " + cmd.var_name + "\n");
+            debug_output_("Removed watch for: " + cmd.var_name);
         }
         else
         {
-            debug_output_("Usage: unwatch <var_name>\n");
+            debug_output_("Usage: unwatch <var_name>");
         }
     }
     else if (cmd.action == "unwatch")
@@ -67,30 +76,36 @@ void Debugger::execute_command(const string& command_line)
         if (!cmd.var_name.empty())
         {
             remove_watch_var(cmd.var_name);
-            debug_output_("Removed watch for: " + cmd.var_name + "\n");
+            debug_output_("Removed watch for: " + cmd.var_name);
         }
         else
         {
-            debug_output_("Usage: unwatch <var_name>\n");
+            debug_output_("Usage: unwatch <var_name>");
         }
     }
     else
     {
-        debug_output_("Unknown command: " + command_line + "\n");
+        debug_output_("Unknown command: " + command_line);
     }
 }
 
 void Debugger::print_help() const
 {
-    debug_output_("\n=== Debug Commands ===\n");
-    debug_output_("set <var_name> <value>  - Set variable value\n");
-    debug_output_("get <var_name>          - Get variable value\n");
-    debug_output_("help                    - Show this help\n");
-    debug_output_("\nExamples:\n");
-    debug_output_("  set target_speed 50\n");
-    debug_output_("  get current_speed\n");
-    debug_output_("  list\n");
-    debug_output_("======================\n");
+    debug_output_("=== Debug Commands ===");
+    debug_output_("set <var_name> <value>  - Set variable value");
+    debug_output_("get <var_name>          - Get variable value");
+    debug_output_("help                    - Show this help");
+    debug_output_("watch <var_name>        - Watch variable");
+    debug_output_("unwatch <var_name>      - Unwatch variable");
+    debug_output_("list                    - List all debug variables");
+    debug_output_("\n");
+    debug_output_("Examples:");
+    debug_output_("  set spid.kp 50");
+    debug_output_("  get target_speed");
+    debug_output_("  watch current_speed");
+    debug_output_("  unwatch current_speed");
+    debug_output_("  list");
+    debug_output_("======================");
 }
 
 Debugger::Command Debugger::parse_command(const string& command_line) const
@@ -109,7 +124,7 @@ void Debugger::set_debug_var(const string& var_name, const string& value)
     }
     else
     {
-        debug_output_("Variable not found: " + var_name + "\n");
+        debug_output_("Variable not found: " + var_name);
     }
 }
 
@@ -121,7 +136,7 @@ string Debugger::get_debug_var(const string& var_name) const
     }
     else
     {
-        debug_output_("Variable not found: " + var_name + "\n");
+        debug_output_("Variable not found: " + var_name);
         return "";
     }
 }
@@ -137,7 +152,7 @@ void Debugger::add_watch_var(const std::string& var_name)
     if (has_debug_var(var_name))
         watch_vars_.insert(var_name);
     else
-        debug_output_("Cannot watch: Variable not found: " + var_name + "\n");
+        debug_output_("Cannot watch: Variable not found: " + var_name);
 }
 
 // 移除监视变量
@@ -151,7 +166,7 @@ void Debugger::send_watch_vars() const
 {
     for (const auto& name : watch_vars_)
     {
-        debug_output_("[WATCH] " + name + " = " + vars_.at(name).get() + "\n");
+        debug_output_("[WATCH] " + name + " = " + vars_.at(name).get());
     }
 }
 

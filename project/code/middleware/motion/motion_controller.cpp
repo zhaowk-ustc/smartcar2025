@@ -6,6 +6,7 @@ MotionController::MotionController(const Config& config) :
     right_motor_(config.right_motor_config),
     left_encoder_(config.left_encoder_config),
     right_encoder_(config.right_encoder_config),
+    servo_(config.servo_config),
     speed_pid_(config.speed_pid_params),
     direction_pid_(config.direction_pid_params)
 {
@@ -83,11 +84,11 @@ void MotionController::connect_inputs(const float* target_speed)
 
 void MotionController::setup_debug_vars()
 {
-    speed_pid_.export_debug_vars(this, "speed_pid.");
-    direction_pid_.export_debug_vars(this, "dir_pid.");
-    add_debug_var("left_encoder_count", make_readonly_var("left_encoder_count", &left_encoder_count_));
-    add_debug_var("right_encoder_count", make_readonly_var("right_encoder_count", &right_encoder_count_));
-    add_debug_var("current_speed", make_readonly_var("current_speed", &current_speed_));
-    add_debug_var("left_motor_duty", make_readonly_var("left_motor_duty", &left_motor_duty_));
-    add_debug_var("right_motor_duty", make_readonly_var("right_motor_duty", &right_motor_duty_));
+    speed_pid_.export_debug_vars(this, "pid_s.");
+    direction_pid_.export_debug_vars(this, "pid_d.");
+    add_debug_var("lenc", make_readonly_var("lenc", &left_encoder_count_));
+    add_debug_var("renc", make_readonly_var("renc", &right_encoder_count_));
+    add_debug_var("spd", make_readonly_var("spd", &current_speed_));
+    add_debug_var("lpwm", make_readonly_var("lpwm", &left_motor_duty_));
+    add_debug_var("rpwm", make_readonly_var("rpwm", &right_motor_duty_));
 }

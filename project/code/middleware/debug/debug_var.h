@@ -3,6 +3,8 @@
 
 #include <string>
 #include <functional>
+#include <iomanip>
+#include <sstream>
 
 using namespace std;
 
@@ -11,7 +13,7 @@ struct DebugVar
 {
     string name;                                  // 变量名
     function<string()> getter;                    // 获取值
-    function<void(const string&)> setter;        // 设置值 - 返回void
+    function<void(const string&)> setter;         // 设置值 - 返回void
     bool read_only;                               // 是否只读
 
     DebugVar() = default;
@@ -36,6 +38,12 @@ struct DebugVar
             setter(value);
         }
     }
+
+    // 更改变量名
+    void set_name(const string& new_name)
+    {
+        name = new_name;
+    }
 };
 
 // 便捷的变量创建函数
@@ -49,6 +57,12 @@ DebugVar make_debug_var(string name, T* ptr)
             {
                 return *ptr ? "true" : "false";
             }
+            else if constexpr (is_same<T, float>::value)
+            {
+                std::ostringstream oss;
+                oss << std::fixed << std::setprecision(2) << *ptr;
+                return oss.str();
+            }
             else
             {
                 return to_string(*ptr);
@@ -57,9 +71,9 @@ DebugVar make_debug_var(string name, T* ptr)
         [ptr](const string& value) -> void {
             if constexpr (is_same<T, bool>::value)
             {
-                if (value == "true" || value == "1") 
+                if (value == "true" || value == "1")
                     *ptr = true;
-                else if (value == "false" || value == "0") 
+                else if (value == "false" || value == "0")
                     *ptr = false;
             }
             else if constexpr (is_same<T, float>::value)
@@ -83,6 +97,12 @@ DebugVar make_readonly_var(string name, T* ptr)
             if constexpr (is_same<T, bool>::value)
             {
                 return *ptr ? "true" : "false";
+            }
+            else if constexpr (is_same<T, float>::value)
+            {
+                std::ostringstream oss;
+                oss << std::fixed << std::setprecision(2) << *ptr;
+                return oss.str();
             }
             else
             {

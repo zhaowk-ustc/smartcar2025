@@ -21,17 +21,17 @@ void Car::init()
 
 void Car::update_mainloop()
 {
-    if(debug_flag_)
+    if (debug_flag_)
     {
         debugger.update();
         debug_flag_ = false;
     }
-    if(ui_flag_)
+    if (ui_flag_)
     {
         ui.update_mainloop();
         ui_flag_ = false;
     }
-    
+
     target_speed = 500;
     motion_controller.update();
     system_delay_ms(10);
@@ -53,12 +53,21 @@ void Car::update_pit20ms()
     ui.update_pit();
 }
 
+DebugVar aaatest_var(
+    "aaatest",
+    []() -> string { return "abcdefgh"; },
+    nullptr,
+    false
+);
+
 void Car::setup_debug_vars()
 {
     motion_controller.export_debug_vars(&debugger, "");
 
     // 添加调试变量
     add_debug_var("target_speed", make_debug_var("target_speed", &target_speed));
+
+    add_debug_var("aaatest", aaatest_var);
 
     // 导出到 Debugger
     export_debug_vars(&debugger, "");

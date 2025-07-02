@@ -6,7 +6,7 @@
 #include <vector>
 #include <string>
 
-class UI
+class UI : public IDebuggable
 {
 public:
     UI();
@@ -27,8 +27,10 @@ private:
     int total_pages_ = 0; // 总页数
     int current_var_index_ = 0; // 当前变量索引
     int current_page_ = 0; // 当前页码
-    
-    static constexpr int vars_per_page_ = 4; // 每页显示的变量数
+
+    static constexpr int vars_per_page_ = 7; // 每页显示的变量数
+
+    void setup_debug_vars() override;
 
     // ui_ops.cpp 中的函数
     void next_item();
@@ -37,7 +39,8 @@ private:
     void prev_page();
 
     // ui_keymap.cpp 中的函数
-    enum class Key {
+    enum class Key
+    {
         NONE,
         UP,
         DOWN,
@@ -46,6 +49,7 @@ private:
         ENTER,
     };
     Key current_key_ = Key::NONE; // 当前按键状态
+    static Key get_key_input();
     void update_key_state();
     void handle_current_key();
     void on_key_up();
@@ -55,14 +59,23 @@ private:
     void on_key_enter();
 
     // ui_menu.cpp 中的函数
+    static constexpr uint16 menu_display_x_ = 0 * 8;
     bool need_clear_ = false; // 是否需要清屏
     static void screen_show_string(const uint16 x, const uint16 y, const string& str, const uint8 len = UINT8_MAX);
     void display_menu();
     void display_vars();
     void display_cursor();
     void display_page_info();
+    enum class CameraDisplayMode
+    {
+        ORIGINAL,
+        CALIBRATED,
+        CALIBRATED_BINARIZED
+    };
+    CameraDisplayMode camera_display_mode_ = CameraDisplayMode::CALIBRATED_BINARIZED;
+    void select_camera_display_mode();
+    static constexpr uint16 camera_display_x_ = 18 * 8; // 摄像头显示的起始X坐标
     void display_camera();
-
 
     bool enabled_ = true; // UI是否启用
 };

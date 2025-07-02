@@ -117,10 +117,10 @@ private:
         add_debug_var("kd", make_debug_var("kd", &kd_));
         add_debug_var("kd2", make_debug_var("kd2", &kd2_));
 
-        // 添加状态变量
-        add_debug_var("error", make_readonly_var("error", &error_));
-        add_debug_var("integral", make_readonly_var("integral", &integral_));
-        add_debug_var("derivative", make_readonly_var("derivative", &derivative_));
+        // // 添加状态变量
+        // add_debug_var("error", make_readonly_var("error", &error_));
+        // add_debug_var("integral", make_readonly_var("integral", &integral_));
+        // add_debug_var("derivative", make_readonly_var("derivative", &derivative_));
     }
 };
 

@@ -40,9 +40,10 @@ public:
     // 导出功能
     void export_debug_vars(IDebuggable* target, const string& prefix)
     {
-        for (const auto& [name, var] : vars_)
+        for (auto& [name, var] : vars_)
         {
-            string exported_name = prefix + name;
+            const string exported_name = prefix + name;
+            var.set_name(exported_name);
             target->add_debug_var(exported_name, var);
         }
         vars_.clear();

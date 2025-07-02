@@ -9,7 +9,7 @@ void UI::screen_show_string(const uint16 x, const uint16 y, const string& str, c
     if (len == UINT8_MAX)
         fixed_len = str.length();
     else
-        fixed_len = min(len, (uint8)str.length());
+        fixed_len = len;
 
     if (str.length() > fixed_len)
         fixed_str = str.substr(0, fixed_len);
@@ -40,19 +40,79 @@ void UI::display_vars()
     for (int i = start_index; i < end_index; ++i)
     {
         const DebugVar* var = var_ptrs_[i];
-        screen_show_string(2 * 8, (i - start_index) * 16, var->name);
-        screen_show_string(12 * 8, (i - start_index) * 16, var->get());
+        screen_show_string(menu_display_x_ + 1 * 8, (i - start_index) * 16, var->name, 9);
+        screen_show_string(menu_display_x_ + 12 * 8, (i - start_index) * 16, var->get(), 5);
     }
 }
 
 void UI::display_cursor()
 {
     int cursor_y = (current_var_index_ % vars_per_page_) * 16;
-    screen_show_string(0, cursor_y, ">");
+    screen_show_string(menu_display_x_, cursor_y, ">");
 }
 
 void UI::display_page_info()
 {
     string page_info = "Page " + to_string(current_page_ + 1) + "/" + to_string(total_pages_);
-    screen_show_string(0, 5 * 16, page_info);
+    screen_show_string(menu_display_x_, vars_per_page_ * 16, page_info);
+}
+
+#include "multicore/core_shared.h"
+
+void UI::select_camera_display_mode()
+{
+    if (camera_display_mode_ == CameraDisplayMode::ORIGINAL)
+    {
+        camera_display_mode_ = CameraDisplayMode::CALIBRATED;
+    }
+    else if (camera_display_mode_ == CameraDisplayMode::CALIBRATED)
+    {
+        camera_display_mode_ = CameraDisplayMode::CALIBRATED_BINARIZED;
+    }
+    else
+    {
+        camera_display_mode_ = CameraDisplayMode::ORIGINAL;
+    }
+}
+
+void UI::display_camera()
+{
+    extern uint8 mt9v03x_image[MT9V03X_H][MT9V03X_W];
+    extern uint8 calibrated_image[49 * 80];
+    extern uint8 calibrated_binary_image[49 * 80];
+
+    const uint8* frame_buffer = nullptr;
+    uint16 width = 0;
+    uint16 height = 0;
+
+    switch (camera_display_mode_)
+    {
+    case CameraDisplayMode::ORIGINAL:
+        frame_buffer = &mt9v03x_image[0][0];
+        width = MT9V03X_W;
+        height = MT9V03X_H;
+        // 刷新缓存，确保从内存重新读取图像数据
+        SCB_InvalidateDCache_by_Addr((void*)frame_buffer, width * height);
+        // 显示缩放2倍
+        ips114_show_gray_image(camera_display_x_, 0, frame_buffer, width, height, width / 2, height / 2, 0);
+        break;
+    case CameraDisplayMode::CALIBRATED:
+        frame_buffer = calibrated_image;
+        width = 80;
+        height = 49;
+        SCB_InvalidateDCache_by_Addr((void*)frame_buffer, width * height);
+        // 直接显示原始大小
+        ips114_show_gray_image(camera_display_x_, 0, frame_buffer, width, height, width, height, 0);
+        break;
+    case CameraDisplayMode::CALIBRATED_BINARIZED:
+        frame_buffer = calibrated_binary_image;
+        width = 80;
+        height = 49;
+        SCB_InvalidateDCache_by_Addr((void*)frame_buffer, width * height);
+        // 直接显示原始大小
+        ips114_show_gray_image(camera_display_x_, 0, frame_buffer, width, height, width, height, 0);
+        break;
+    default:
+        break;
+    }
 }

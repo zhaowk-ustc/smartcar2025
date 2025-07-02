@@ -232,8 +232,9 @@ uint32 debug_send_buffer(const uint8 *buff, uint32 len)
 //-------------------------------------------------------------------------------------------------------------------
 uint32 debug_read_ring_buffer (uint8 *buff, uint32 len)
 {
-    fifo_read_buffer(&debug_uart_fifo, buff, &len, FIFO_READ_AND_CLEAN);
-    return len;
+    uint32 data_len = len;
+    fifo_read_buffer(&debug_uart_fifo, buff, &data_len, FIFO_READ_AND_CLEAN);
+    return data_len;
 }
 
 //-------------------------------------------------------------------------------------------------------------------

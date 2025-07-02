@@ -31,7 +31,6 @@ private:
     // 核心组件
     // VisionSystem vision_system;  // 视觉系统
     MotionController motion_controller;  // 运动控制
-
     Debugger debugger;
     UI ui;
 

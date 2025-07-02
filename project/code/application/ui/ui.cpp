@@ -44,3 +44,18 @@ void UI::disable()
 {
     enabled_ = false;
 }
+
+string& ui_test_get()
+{
+    static string test_var = "UI Test Variable";
+    return test_var;
+}
+
+void UI::setup_debug_vars()
+{
+    add_debug_var("ui_var_test", DebugVar(
+        "ui_var_test",
+        []() { return ui_test_get(); },
+        [](const string& value) -> void { ui_test_get() = value; }
+    ));
+}

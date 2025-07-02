@@ -3,6 +3,8 @@
 
 #include "middleware/motion/motor.h"
 #include "middleware/motion/encoder.h"
+#include "middleware/motion/servo.h"
+#include "middleware/motion/pid.h"
 #include "middleware/motion/motion_controller.h"
 
 
@@ -32,6 +34,11 @@ constexpr Encoder::encoder_config right_encoder_config={
     .direction = Encoder::Direction::CCW
 };
 
+constexpr Servo::config servo_config = {
+    .pwm_channel = TCPWM_CH13_P00_3
+};
+
+
 constexpr PID::Params speed_pid_params = {
     .kp = 0.5f,
     .ki = 0.1f,
@@ -52,6 +59,7 @@ constexpr MotionController::Config motion_config = {
    .right_motor_config = right_motor_config,
    .left_encoder_config = left_encoder_config,
    .right_encoder_config = right_encoder_config,
+   .servo_config = servo_config,
 
    // 控制参数
    .speed_pid_params = speed_pid_params,

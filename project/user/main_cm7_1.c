@@ -43,7 +43,7 @@
 // 本例程是开源库空工程 可用作移植或者测试各类内外设
 
 // **************************** 代码区域 ****************************
-
+#include "application/tasks/tasks_core1.h"
 int main(void)
 {
     clock_init(SYSTEM_CLOCK_250M); 	// 时钟配置及系统初始化<务必保留>
@@ -51,15 +51,17 @@ int main(void)
      
     // 此处编写用户代码 例如外设初始化代码等
 
-
-    
+    app_init_core1();
+    pit_ms_init(PIT_CH0, 5);
+    pit_ms_init(PIT_CH1, 10);
+    pit_ms_init(PIT_CH2, 20);
 
     // 此处编写用户代码 例如外设初始化代码等
     while(true)
     {
         // 此处编写需要循环执行的代码
         
-
+        mainloop_tasks_core1();
       
       
         // 此处编写需要循环执行的代码

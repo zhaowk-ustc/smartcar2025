@@ -1,29 +1,20 @@
 #include "ui.h"
 
+UI::Key UI::get_key_input()
+{
+    // 实现具体的按键读取逻辑
+
+    return Key::NONE;
+}
+
 void UI::update_key_state()
 {
-    // // 读取当前按键状态并更新 current_key_
-    // char key = get_key_input();
-    // switch (key) {
-    //     case 'w':
-    //         current_key_ = Key::UP;
-    //         break;
-    //     case 's':
-    //         current_key_ = Key::DOWN;
-    //         break;
-    //     case 'a':
-    //         current_key_ = Key::LEFT;
-    //         break;
-    //     case 'd':
-    //         current_key_ = Key::RIGHT;
-    //         break;
-    //     case 'e':
-    //         current_key_ = Key::ENTER;
-    //         break;
-    //     default:
-    //         current_key_ = Key::NONE;
-    //         break;
-    // }
+    // 读取当前按键状态并更新 current_key_
+    auto key = get_key_input();
+    if (key != Key::NONE)
+    {
+        current_key_ = key;
+    }
 }
 
 void UI::handle_current_key()

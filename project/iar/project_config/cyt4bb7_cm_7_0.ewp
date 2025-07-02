@@ -1217,6 +1217,15 @@
                 <name>$PROJ_DIR$\..\..\code\middleware\module_base.h</name>
             </file>
         </group>
+        <group>
+            <name>multicore</name>
+            <file>
+                <name>$PROJ_DIR$\..\..\code\multicore\core_shared.cpp</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\..\code\multicore\core_shared.h</name>
+            </file>
+        </group>
         <file>
             <name>$PROJ_DIR$\..\..\code\本文件夹作用.txt</name>
         </file>

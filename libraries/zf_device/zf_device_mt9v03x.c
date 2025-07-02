@@ -56,6 +56,7 @@
 #include "zf_device_mt9v03x.h"
 
 vuint8 mt9v03x_finish_flag = 0;                                                 // 一场图像采集完成标志位
+#pragma location = 0x2802B844
 uint8 mt9v03x_image[MT9V03X_H][MT9V03X_W];     
 
 static uint8 perfect_proportion = 0;

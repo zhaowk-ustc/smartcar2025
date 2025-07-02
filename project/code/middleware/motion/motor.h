@@ -3,6 +3,7 @@
 
 
 #include "zf_common_headfile.h"
+#include "middleware/module_base.h"
 
 class Motor : public Module
 {

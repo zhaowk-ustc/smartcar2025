@@ -4,6 +4,7 @@
 #include "pid.h"
 #include "motor.h"
 #include "encoder.h"
+#include "servo.h"
 #include "../module_base.h"
 
 class MotionController : public Module, public IDebuggable
@@ -16,6 +17,7 @@ public:
         Motor::config right_motor_config;
         Encoder::encoder_config left_encoder_config;
         Encoder::encoder_config right_encoder_config;
+        Servo::config servo_config;
 
         // 控制参数
         PID::Params speed_pid_params;
@@ -37,6 +39,7 @@ private:
     Motor right_motor_;
     Encoder left_encoder_;
     Encoder right_encoder_;
+    Servo servo_;
 
     // PID控制器
     PID speed_pid_;
