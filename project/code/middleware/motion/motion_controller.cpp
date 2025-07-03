@@ -14,19 +14,12 @@ MotionController::MotionController(const Config& config) :
     left_encoder_.connect_outputs(&left_encoder_count_);
     right_encoder_.connect_outputs(&right_encoder_count_);
 
-    speed_pid_.connect_inputs(
-        target_speed_,
-        &current_speed_,
-        nullptr // 无前馈输入
-    );
-
+    speed_pid_.connect_inputs(&target_speed, &current_speed_, &target_speed_accel);
     speed_pid_.connect_outputs(&speed_pid_output_);
-
     left_motor_.connect_inputs(&left_motor_duty_);
     right_motor_.connect_inputs(&right_motor_duty_);
-
+    servo_.connect_inputs(&servo_duty_);
     setup_debug_vars();
-
 }
 
 void MotionController::init()
@@ -36,7 +29,9 @@ void MotionController::init()
     right_motor_.init();
     left_encoder_.init();
     right_encoder_.init();
+    servo_.init();
 
+    icm20602_init();
 }
 
 void MotionController::reset()
@@ -59,10 +54,16 @@ void MotionController::reset()
     direction_pid_output_ = 0.0f;
     left_motor_duty_ = 0;
     right_motor_duty_ = 0;
+    servo_duty_ = 0;
 }
 
 void MotionController::update()
 {
+    target_speed = *input_speed_;
+    target_speed_accel = input_speed_accel_ ? *input_speed_accel_ : 0.0f;
+    target_direction = *input_direction_;
+    target_direction_accel = input_direction_accel_ ? *input_direction_accel_ : 0.0f;
+
     left_encoder_.update();
     right_encoder_.update();
 
@@ -75,11 +76,19 @@ void MotionController::update()
 
     left_motor_.update();
     right_motor_.update();
+    servo_.update();
 }
 
-void MotionController::connect_inputs(const float* target_speed)
+void MotionController::connect_inputs(
+    const float* input_speed,
+    const float* input_speed_accel,
+    const float* input_direction,
+    const float* input_direction_accel)
 {
-    target_speed_ = target_speed;
+    input_speed_ = input_speed;
+    input_speed_accel_ = input_speed_accel;
+    input_direction_ = input_direction;
+    input_direction_accel_ = input_direction_accel;
 }
 
 void MotionController::setup_debug_vars()
@@ -91,4 +100,5 @@ void MotionController::setup_debug_vars()
     add_debug_var("spd", make_readonly_var("spd", &current_speed_));
     add_debug_var("lpwm", make_readonly_var("lpwm", &left_motor_duty_));
     add_debug_var("rpwm", make_readonly_var("rpwm", &right_motor_duty_));
+    add_debug_var("servopwm", make_debug_var("servopwm", &servo_duty_));
 }

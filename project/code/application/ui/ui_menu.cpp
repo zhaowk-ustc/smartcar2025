@@ -73,6 +73,7 @@ void UI::select_camera_display_mode()
     {
         camera_display_mode_ = CameraDisplayMode::ORIGINAL;
     }
+    ips114_clear();
 }
 
 void UI::display_camera()

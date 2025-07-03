@@ -11,6 +11,7 @@ void app_init_core1()
 
 void mainloop_tasks_core1()
 {
+    vision_system.update();
 
 }
 

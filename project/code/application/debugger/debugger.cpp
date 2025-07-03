@@ -26,13 +26,57 @@ void Debugger::execute_command(const string& command_line)
 
     if (cmd.action == "set")
     {
+        if (!has_debug_var(cmd.var_name))
+        {
+            debug_output_("Variable not found: " + cmd.var_name);
+            return;
+        }
+        const auto& var = vars_.at(cmd.var_name);
+        if (var.read_only)
+        {
+            debug_output_("Variable is read-only: " + cmd.var_name);
+            return;
+        }
+        if (var.is_function)
+        {
+            debug_output_("Cannot set function variable, use call instead: " + cmd.var_name);
+            return;
+        }
         set_debug_var(cmd.var_name, cmd.value);
-        debug_output_("Set " + cmd.var_name + " = " + cmd.value);
+        debug_output_("Set " + cmd.var_name + " = " + get_debug_var(cmd.var_name));
     }
     else if (cmd.action == "get")
     {
+        if (!has_debug_var(cmd.var_name))
+        {
+            debug_output_("Variable not found: " + cmd.var_name);
+            return;
+        }
+        const auto& var = vars_.at(cmd.var_name);
+        if (var.is_function)
+        {
+            debug_output_("Cannot get value of function variable: " + cmd.var_name);
+            return;
+        }
         string value = get_debug_var(cmd.var_name);
         debug_output_(cmd.var_name + " = " + value);
+    }
+    else if (cmd.action == "call")
+    {
+        if (!has_debug_var(cmd.var_name))
+        {
+            debug_output_("Variable not found: " + cmd.var_name);
+            return;
+        }
+        auto& var = vars_.at(cmd.var_name);
+        if (!var.is_function)
+        {
+            debug_output_("Variable is not a function: " + cmd.var_name);
+            return;
+        }
+        // 调用 function 变量
+        var.set("");
+        debug_output_("Function called: " + cmd.var_name);
     }
     else if (cmd.action == "help")
     {
@@ -43,7 +87,16 @@ void Debugger::execute_command(const string& command_line)
         debug_output_("=== List of Debug Variables ===");
         for (const auto& [name, var] : vars_)
         {
-            debug_output_(name);
+            if (var.is_function)
+            {
+                debug_output_(name + " = [function]");
+            }
+            else
+            {
+                std::string line = name + " = " + var.get();
+                if (var.read_only) line += " [readonly]";
+                debug_output_(line);
+            }
         }
         debug_output_("===============================");
     }
@@ -51,8 +104,19 @@ void Debugger::execute_command(const string& command_line)
     {
         if (!cmd.var_name.empty())
         {
-            add_watch_var(cmd.var_name);
-            debug_output_("Added watch for: " + cmd.var_name);
+            if (!has_debug_var(cmd.var_name))
+            {
+                debug_output_("Cannot watch: Variable not found: " + cmd.var_name);
+            }
+            else if (vars_.at(cmd.var_name).is_function)
+            {
+                debug_output_("Cannot watch function variable: " + cmd.var_name);
+            }
+            else
+            {
+                add_watch_var(cmd.var_name);
+                debug_output_("Added watch for: " + cmd.var_name);
+            }
         }
         else
         {
@@ -95,6 +159,7 @@ void Debugger::print_help() const
     debug_output_("set <var_name> <value>  - Set variable value");
     debug_output_("get <var_name>          - Get variable value");
     debug_output_("help                    - Show this help");
+    debug_output_("call <var_name>         - Call function variable");
     debug_output_("watch <var_name>        - Watch variable");
     debug_output_("unwatch <var_name>      - Unwatch variable");
     debug_output_("list                    - List all debug variables");
@@ -164,10 +229,14 @@ void Debugger::remove_watch_var(const std::string& var_name)
 // 发送所有监视变量的当前值
 void Debugger::send_watch_vars() const
 {
+    if (watch_vars_.empty()) return;
+    std::string line = "[WATCH]";
     for (const auto& name : watch_vars_)
     {
-        debug_output_("[WATCH] " + name + " = " + vars_.at(name).get());
+        line += name + "=" + vars_.at(name).get() + "\t";
     }
+    line.pop_back();  // 移除最后一个制表符
+    debug_output_(line);
 }
 
 vector<const DebugVar*> Debugger::list_var_ptrs() const

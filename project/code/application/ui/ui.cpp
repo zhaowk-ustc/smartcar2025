@@ -4,11 +4,13 @@
 
 UI::UI()
 {
+    setup_debug_vars();
 }
 
 void UI::init()
 {
     ips114_init();
+
 }
 
 void UI::update_mainloop()
@@ -53,9 +55,5 @@ string& ui_test_get()
 
 void UI::setup_debug_vars()
 {
-    add_debug_var("ui_var_test", DebugVar(
-        "ui_var_test",
-        []() { return ui_test_get(); },
-        [](const string& value) -> void { ui_test_get() = value; }
-    ));
+    add_debug_var("switch_camera", make_function_var("switch_camera", [this] { select_camera_display_mode(); }));
 }

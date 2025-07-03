@@ -1153,6 +1153,12 @@
                     <name>$PROJ_DIR$\..\..\code\middleware\vision\line_tracking.h</name>
                 </file>
                 <file>
+                    <name>$PROJ_DIR$\..\..\code\middleware\vision\line_tracking_graph.cpp</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\code\middleware\vision\line_tracking_graph.h</name>
+                </file>
+                <file>
                     <name>$PROJ_DIR$\..\..\code\middleware\vision\vision_system.cpp</name>
                 </file>
                 <file>
@@ -1165,6 +1171,12 @@
         </group>
         <group>
             <name>multicore</name>
+            <file>
+                <name>$PROJ_DIR$\..\..\code\multicore\core_shared.cpp</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\..\code\multicore\core_shared.h</name>
+            </file>
         </group>
         <file>
             <name>$PROJ_DIR$\..\..\code\本文件夹作用.txt</name>

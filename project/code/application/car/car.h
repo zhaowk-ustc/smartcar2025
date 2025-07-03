@@ -36,6 +36,9 @@ private:
 
     // 状态变量
     float target_speed;
+    float target_speed_accel;
+    float target_direction;
+    float target_direction_accel;
 
 
     // 标志位

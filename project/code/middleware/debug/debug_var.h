@@ -15,14 +15,16 @@ struct DebugVar
     function<string()> getter;                    // 获取值
     function<void(const string&)> setter;         // 设置值 - 返回void
     bool read_only;                               // 是否只读
+    bool is_function = false;                     // 是否为function类型
 
     DebugVar() = default;
 
     DebugVar(string var_name,
         function<string()> get_func,
         function<void(const string&)> set_func = nullptr,
-        bool readonly = false)
-        : name(var_name), getter(get_func), setter(set_func), read_only(readonly)
+        bool readonly = false,
+        bool is_func = false)
+        : name(var_name), getter(get_func), setter(set_func), read_only(readonly), is_function(is_func)
     {
     }
 
@@ -114,14 +116,16 @@ DebugVar make_readonly_var(string name, T* ptr)
     );
 }
 
-// DebugVar make_function_var(string name, function<void(const string&)> func)
-// {
-//     return DebugVar(
-//         name,
-//         []() -> string { return ""; },
-//         func,
-//         false
-//     );
-// }
+
+inline DebugVar make_function_var(string name, function<void(void)> func)
+{
+    return DebugVar(
+        name,
+        nullptr,
+        [func](const string&) { func(); },
+        false,
+        true
+    );
+}
 
 #endif // DEBUG_VAR_H

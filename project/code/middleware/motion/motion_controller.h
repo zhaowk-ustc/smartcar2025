@@ -31,7 +31,10 @@ public:
     void update() override;
     void reset() override;
 
-    void connect_inputs(const float* target_speed_);
+    void connect_inputs(const float* input_speed,
+                        const float* input_speed_accel,
+                        const float* input_direction,
+                        const float* input_direction_accel);
 
 private:
     // 硬件组件
@@ -46,7 +49,15 @@ private:
     PID direction_pid_;
 
     // 输入
-    const float* target_speed_;
+    const float* input_speed_;
+    const float* input_speed_accel_; 
+    const float* input_direction_;
+    const float* input_direction_accel_;
+    float target_speed;
+    float target_speed_accel;
+    float target_direction;
+    float target_direction_accel;
+
 
     // 内部状态
     int16 left_encoder_count_;
@@ -59,8 +70,10 @@ private:
 
     int16 left_motor_duty_;
     int16 right_motor_duty_;
+    uint16 servo_duty_;
 
     void setup_debug_vars() override;
+
 };
 
 #endif // MOTION_CONTROLLER_H

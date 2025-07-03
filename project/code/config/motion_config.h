@@ -9,29 +9,29 @@
 
 
 constexpr Motor::config left_motor_config={
-    .pwm_channel = TCPWM_CH11_P05_2, 
-    .dir_pin = P05_3, 
-    .direction = Motor::Direction::CW
+    .pwm_channel = TCPWM_CH30_P10_2, 
+    .dir_pin = P10_3, 
+    .direction = Motor::Direction::CCW
 };
 
 constexpr Motor::config right_motor_config={
-    .pwm_channel = TCPWM_CH09_P05_0,
-    .dir_pin = P05_1,
-    .direction = Motor::Direction::CCW
+    .pwm_channel = TCPWM_CH24_P09_0,
+    .dir_pin = P09_1,
+    .direction = Motor::Direction::CW
 };
 
 constexpr Encoder::encoder_config left_encoder_config={
     .encoder = TC_CH07_ENCODER,
     .count_pin = TC_CH07_ENCODER_CH1_P07_6,
     .dir_pin = TC_CH07_ENCODER_CH2_P07_7,
-    .direction = Encoder::Direction::CW
+    .direction = Encoder::Direction::CCW
 };
 
 constexpr Encoder::encoder_config right_encoder_config={
     .encoder = TC_CH20_ENCODER,
     .count_pin = TC_CH20_ENCODER_CH1_P08_1,
     .dir_pin = TC_CH20_ENCODER_CH2_P08_2,
-    .direction = Encoder::Direction::CCW
+    .direction = Encoder::Direction::CW
 };
 
 constexpr Servo::config servo_config = {
@@ -40,8 +40,8 @@ constexpr Servo::config servo_config = {
 
 
 constexpr PID::Params speed_pid_params = {
-    .kp = 0.5f,
-    .ki = 0.1f,
+    .kp = 4.0f,
+    .ki = 0.5f,
     .kd = 0.05f,
     .kd2 = 0.0f
 };

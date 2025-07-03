@@ -8,6 +8,4 @@
 //      dest_image_data - 校正后图像数据指针
 void image_calibration(const uint8* source_image_data, uint8* dest_image_data);
 
-// extern const uint16 calibration_map[80*49];
-
 #endif

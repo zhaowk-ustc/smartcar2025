@@ -1,5 +1,7 @@
 #include "calibration.h"
 
+extern const uint16_t calibration_map[];
+
 void image_calibration(const uint8* source_image_data, uint8* dest_image_data)
 {
     for (uint16 idx = 0; idx < 49 * 80; idx++)

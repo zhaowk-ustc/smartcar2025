@@ -5,6 +5,8 @@ struct Point
     int16 x; // x坐标
     int16 y; // y坐标
 
+    Point(int x,int y) : x(int16(x)), y(int16(y)) {}
+
     Point operator+(const Point& other) const
     {
         return { int16(x + other.x), int16(y + other.y) };

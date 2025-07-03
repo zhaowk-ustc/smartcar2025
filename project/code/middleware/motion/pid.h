@@ -20,8 +20,9 @@ public:
         float kp, ki, kd, kd2;
     };
 
+    static constexpr float kIntegralLimit = 10000.0f; // 积分限幅
+
     PID(const Params& params):
-        // PID参数
         kp_(params.kp), ki_(params.ki), kd_(params.kd), kd2_(params.kd2)
     {
         setup_debug_vars();
@@ -51,7 +52,11 @@ public:
 
         // PID算法计算
         error_ = setpoint - measured_value;
+
         integral_ += error_;
+        // 积分限幅
+        if (integral_ > kIntegralLimit) integral_ = kIntegralLimit;
+        if (integral_ < -kIntegralLimit) integral_ = -kIntegralLimit;
 
         // 导数计算
         derivative_ = error_ - previous_error_;

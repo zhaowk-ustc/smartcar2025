@@ -32,9 +32,4 @@ void VisionSystem::update()
 
     image_binarization(calibrated_image, calibrated_binary_image, 49 * 80);
 
-
-
-
-
-
 }
