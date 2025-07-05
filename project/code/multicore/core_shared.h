@@ -1,8 +1,15 @@
+#pragma once
 #include "zf_common_headfile.h"
+#include "middleware/vision/point.h"
 
-extern uint8 mt9v03x_image[MT9V03X_H][MT9V03X_W];
-extern uint8 calibrated_image[49 * 80];
-extern uint8 calibrated_binary_image[49 * 80];
+#include "middleware/vision/road_element.h"
+
+constexpr uint16_t calibrated_width = 80;
+constexpr uint16_t calibrated_height = 49;
+
+extern uint8_t mt9v03x_image[MT9V03X_H][MT9V03X_W];
+extern uint8_t calibrated_image[calibrated_height * calibrated_width];
+extern uint8_t calibrated_binary_image[calibrated_height * calibrated_width];
 
 struct VisionConfigShared
 {
@@ -12,16 +19,21 @@ struct VisionConfigShared
 
 struct VisionOutputsShared
 {
-    uint8* calibrated_image_data = calibrated_image;          // 校正后的图像数据
-    uint8* calibrated_binary_image_data = calibrated_binary_image; // 二值化后的图像数据
+    float bias;                        // 循迹偏差
+    float bias_accel;                // 循迹偏差加速度
+    float target_speed;               // 目标速度
+    float target_speed_accel;        // 目标速度加速度
 };
 
 // 除图像外只读调试数据
 struct VisionDebugShared
 {
-    uint8* raw_image = mt9v03x_image[0]; // 原始图像数据
-    uint8* calibrated_image = calibrated_image; // 校正后的图像数据
-    uint8* calibrated_binary_image = calibrated_binary_image; // 二值化后的图像数据
+    int16 left_bounds[calibrated_height];
+    int16 right_bounds[calibrated_height];
+    int16 line_points[calibrated_height]; // 道路中心线点
+    RoadElementType element_type;      // 检测到的道路元素类型
+    int element_position;              // 元素位置
+    float element_confidence;          // 元素检测置信度
 };
 
 extern VisionConfigShared vision_config_shared;

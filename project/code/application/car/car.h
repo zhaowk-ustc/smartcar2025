@@ -26,6 +26,8 @@ public:
     void update_pit10ms();
     void update_pit20ms();
 
+    void update_multicore();
+
 private:
 
     // 核心组件

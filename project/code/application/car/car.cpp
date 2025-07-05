@@ -1,4 +1,6 @@
 #include "car.h"
+#include "multicore/core_shared.h"
+#include "middleware/vision/road_element.h"
 #include <cmath>
 
 Car::Car(const Car::Config& config)
@@ -35,11 +37,13 @@ void Car::update_mainloop()
         ui.update_mainloop();
         ui_flag_ = false;
     }
-    system_delay_ms(10);
+    update_multicore();
+    system_delay_ms(1);
 }
 
 void Car::update_pit5ms()
 {
+
 }
 
 void Car::update_pit10ms()
@@ -61,10 +65,21 @@ void Car::setup_debug_vars()
 
     // 添加调试变量
     add_debug_var("target_speed", make_debug_var("target_speed", &target_speed));
+    add_debug_var("target_speed_accel", make_debug_var("target_speed_accel", &target_speed_accel));
+    add_debug_var("target_direction", make_debug_var("target_direction", &target_direction));
+    add_debug_var("target_direction_accel", make_debug_var("target_direction_accel", &target_direction_accel));
 
     // 导出到 Debugger
     export_debug_vars(&debugger, "");
 
     // 复制到ui
     ui.import_vars(debugger.list_var_ptrs());
+}
+
+void Car::update_multicore()
+{
+    SCB_InvalidateDCache_by_Addr((void*)&vision_outputs_shared, sizeof(vision_outputs_shared));
+
+    target_direction = vision_outputs_shared.bias;
+
 }

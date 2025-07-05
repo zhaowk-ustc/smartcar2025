@@ -1457,25 +1457,31 @@
                     <name>$PROJ_DIR$\..\..\code\middleware\vision\calibration.h</name>
                 </file>
                 <file>
-                    <name>$PROJ_DIR$\..\..\code\middleware\vision\image.h</name>
-                </file>
-                <file>
                     <name>$PROJ_DIR$\..\..\code\middleware\vision\line_tracking.cpp</name>
                 </file>
                 <file>
                     <name>$PROJ_DIR$\..\..\code\middleware\vision\line_tracking.h</name>
                 </file>
                 <file>
-                    <name>$PROJ_DIR$\..\..\code\middleware\vision\line_tracking_graph.cpp</name>
+                    <name>$PROJ_DIR$\..\..\code\middleware\vision\point.h</name>
                 </file>
                 <file>
-                    <name>$PROJ_DIR$\..\..\code\middleware\vision\line_tracking_graph.h</name>
+                    <name>$PROJ_DIR$\..\..\code\middleware\vision\road_element.cpp</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\code\middleware\vision\road_element.h</name>
                 </file>
                 <file>
                     <name>$PROJ_DIR$\..\..\code\middleware\vision\vision_system.cpp</name>
                 </file>
                 <file>
                     <name>$PROJ_DIR$\..\..\code\middleware\vision\vision_system.h</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\code\middleware\vision\vision_utils.cpp</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\code\middleware\vision\vision_utils.h</name>
                 </file>
             </group>
             <file>

@@ -1,35 +1,33 @@
-#ifndef LINE_TRACKING_H
-#define LINE_TRACKING_H
+#pragma once
 
-#include "image.h"
-#include "line_tracking_graph.h"
+#include "zf_common_headfile.h"
+#include "point.h"
+#include "road_element.h"
+#include "vision_utils.h"
 #include <vector>
-#include <cstdint>
-
 using namespace std;
 
-// 图像处理相关函数声明
+// 寻找所有行的左边界，返回左边界数组
+vector<int16> find_left_bounds(const uint8* image, uint16 width, uint16 height,
+    const vector<int16>& extend_search_offsets);
 
-// 虚线连接检测和修复
-void connectDashedLines(vector<uint8_t>& img, int w, int h, int max_gap = 10);
+// 寻找所有行的右边界，返回右边界数组
+vector<int16> find_right_bounds(const uint8* image, uint16 width, uint16 height,
+    const vector<int16>& extend_search_offsets);
 
-// 端点检测：识别可能的线段端点
-vector<pair<int, int>> detectEndpoints(const vector<uint8_t>& img, int w, int h);
+// 智能偏差计算函数，结合道路元素检测结果
+// 参数：road_line - 整理后的道路中心线
+//      road_element - 道路元素检测结果
+//      width - 图像宽度，用于计算中心点
+// 返回：计算得到的偏差值（负值表示左偏，正值表示右偏）
+float get_bias(const vector<int16>& road_line, 
+               const RoadElementResult& road_element, uint16 width = 80);
 
-// 改进的虚线修复：基于端点配对
-void repairDashedLinesAdvanced(vector<uint8_t>& img, int w, int h, double max_gap = 15.0);
 
-// BFS层次遍历，构建拓扑图
-LineTrackingGraph bfs_layer_midpoints(const uint8_t* img, int w, int h, double dist_thresh = 5.0);
+// 道路补线函数，专注于处理虚线和边界缺失
+// 参数：left - 左边界数组
+//      right - 右边界数组
+//      road_element - 道路元素检测结果
+// 返回：补线后的道路中心线（第一个无效点前总是有效，后面都是无效点）
+vector<int16> process_road_line(const vector<int16>& left, const vector<int16>& right);
 
-// 主流程：输入二值图像，输出简化后的拓扑结构和可视化图像数据
-// 返回可视化图像的数据指针，调用者负责释放内存
-uint8_t* extract_and_visualize_topology(const uint8_t* bin_img, int width, int height, 
-                                       LineTrackingGraph& simplified_graph);
-
-// 辅助函数：在图像上绘制圆点
-void draw_circle_on_image(uint8_t* img_data, int width, int height, 
-                         int center_x, int center_y, int radius, 
-                         uint8_t r_val, uint8_t g_val, uint8_t b_val);
-
-#endif // LINE_TRACKING_H

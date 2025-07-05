@@ -19,8 +19,6 @@ public:
     void reset() override;
     void update() override;
 
-private:
-
 };
 
 #endif // VISION_SYSTEM_H

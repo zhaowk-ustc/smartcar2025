@@ -8,6 +8,21 @@
 #include "middleware/motion/motion_controller.h"
 
 
+constexpr PID::Params speed_pid_params = {
+    .kp = 4.0f,
+    .ki = 0.5f,
+    .kd = 0.05f,
+    .kd2 = 0.0f
+};
+
+constexpr PID::Params direction_pid_params = {
+    .kp = 3.0f,
+    .ki = 0.0f,
+    .kd = 0.00f,
+    .kd2 = 0.0f
+};
+
+
 constexpr Motor::config left_motor_config={
     .pwm_channel = TCPWM_CH30_P10_2, 
     .dir_pin = P10_3, 
@@ -38,20 +53,6 @@ constexpr Servo::config servo_config = {
     .pwm_channel = TCPWM_CH13_P00_3
 };
 
-
-constexpr PID::Params speed_pid_params = {
-    .kp = 4.0f,
-    .ki = 0.5f,
-    .kd = 0.05f,
-    .kd2 = 0.0f
-};
-
-constexpr PID::Params direction_pid_params = {
-    .kp = 1.0f,
-    .ki = 0.1f,
-    .kd = 0.01f,
-    .kd2 = 0.0f
-};
 
 constexpr MotionController::Config motion_config = {
    // 硬件配置

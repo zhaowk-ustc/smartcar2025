@@ -47,11 +47,6 @@ void UI::disable()
     enabled_ = false;
 }
 
-string& ui_test_get()
-{
-    static string test_var = "UI Test Variable";
-    return test_var;
-}
 
 void UI::setup_debug_vars()
 {

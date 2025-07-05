@@ -64,13 +64,14 @@ private:
     int16 right_encoder_count_;
 
     float current_speed_;
+    float current_direction_ = 0.0f; // 当前方向，初始为0
 
     float speed_pid_output_;
     float direction_pid_output_;
 
     int16 left_motor_duty_;
     int16 right_motor_duty_;
-    uint16 servo_duty_;
+    float servo_dir_;
 
     void setup_debug_vars() override;
 

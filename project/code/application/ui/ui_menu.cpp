@@ -1,5 +1,7 @@
 #include "ui.h"
 #include <algorithm>
+#include <cmath>
+#include "middleware/vision/road_element.h"
 using namespace std;
 
 void UI::screen_show_string(const uint16 x, const uint16 y, const string& str, const uint8 len)
@@ -30,6 +32,8 @@ void UI::display_menu()
     display_cursor();
     display_page_info();
     display_camera();
+    if (camera_display_mode_ == CameraDisplayMode::CALIBRATED_BINARIZED)
+        display_overlay(); // 显示拓扑图叠加层
 }
 
 void UI::display_vars()
@@ -88,32 +92,63 @@ void UI::display_camera()
 
     switch (camera_display_mode_)
     {
-    case CameraDisplayMode::ORIGINAL:
-        frame_buffer = &mt9v03x_image[0][0];
-        width = MT9V03X_W;
-        height = MT9V03X_H;
-        // 刷新缓存，确保从内存重新读取图像数据
-        SCB_InvalidateDCache_by_Addr((void*)frame_buffer, width * height);
-        // 显示缩放2倍
-        ips114_show_gray_image(camera_display_x_, 0, frame_buffer, width, height, width / 2, height / 2, 0);
-        break;
-    case CameraDisplayMode::CALIBRATED:
-        frame_buffer = calibrated_image;
-        width = 80;
-        height = 49;
-        SCB_InvalidateDCache_by_Addr((void*)frame_buffer, width * height);
-        // 直接显示原始大小
-        ips114_show_gray_image(camera_display_x_, 0, frame_buffer, width, height, width, height, 0);
-        break;
-    case CameraDisplayMode::CALIBRATED_BINARIZED:
-        frame_buffer = calibrated_binary_image;
-        width = 80;
-        height = 49;
-        SCB_InvalidateDCache_by_Addr((void*)frame_buffer, width * height);
-        // 直接显示原始大小
-        ips114_show_gray_image(camera_display_x_, 0, frame_buffer, width, height, width, height, 0);
-        break;
-    default:
-        break;
+        case CameraDisplayMode::ORIGINAL:
+            frame_buffer = &mt9v03x_image[0][0];
+            width = MT9V03X_W;
+            height = MT9V03X_H;
+            // 刷新缓存，确保从内存重新读取图像数据
+            SCB_InvalidateDCache_by_Addr((void*)frame_buffer, width * height);
+            // 显示缩放2倍
+            ips114_show_gray_image(camera_display_x_, 0, frame_buffer, width, height, width / 2, height / 2, 0);
+            break;
+        case CameraDisplayMode::CALIBRATED:
+            frame_buffer = calibrated_image;
+            width = 80;
+            height = 49;
+            SCB_InvalidateDCache_by_Addr((void*)frame_buffer, width * height);
+            // 直接显示原始大小
+            ips114_show_gray_image(camera_display_x_, 0, frame_buffer, width, height, width, height, 0);
+            break;
+        case CameraDisplayMode::CALIBRATED_BINARIZED:
+            frame_buffer = calibrated_binary_image;
+            width = 80;
+            height = 49;
+            SCB_InvalidateDCache_by_Addr((void*)frame_buffer, width * height);
+            // 直接显示原始大小
+            ips114_show_gray_image(camera_display_x_, 0, frame_buffer, width, height, width, height, 0);
+            break;
+        default:
+            break;
     }
+}
+
+void UI::display_overlay()
+{
+    int line_count = calibrated_height;
+    SCB_InvalidateDCache_by_Addr((void*)&vision_debug_shared, sizeof(vision_debug_shared));
+    auto left_bound = vision_debug_shared.left_bounds;
+    auto middle_bound = vision_debug_shared.line_points;
+    auto right_bound = vision_debug_shared.right_bounds;
+
+    for (int i = 0; i < line_count; ++i)
+    {
+        auto l = camera_display_x_ + left_bound[i];
+        auto m = camera_display_x_ + middle_bound[i];
+        auto r = camera_display_x_ + right_bound[i];
+        ips114_draw_point(l, i, RGB565_RED);
+        ips114_draw_point(l + 1, i, RGB565_RED);
+        ips114_draw_point(l + 2, i, RGB565_RED);
+
+        ips114_draw_point(r, i, RGB565_BLUE);
+        ips114_draw_point(r - 1, i, RGB565_BLUE);
+        ips114_draw_point(r - 2, i, RGB565_BLUE);
+
+        ips114_draw_point(m, i, RGB565_GREEN);
+    }
+    ips114_show_string(camera_display_x_, 50, "Element:");
+    screen_show_string(camera_display_x_, 50 + 16, road_element_type_to_string(vision_debug_shared.element_type), 8);
+    ips114_show_string(camera_display_x_, 50 + 16 * 2, "pos:");
+    ips114_show_int(camera_display_x_ + 8 * 5, 50 + 16 * 2, vision_debug_shared.element_position, 3);
+    ips114_show_string(camera_display_x_, 50 + 16 * 3, "conf:");
+    ips114_show_float(camera_display_x_ + 8 * 5, 50 + 16 * 3, vision_debug_shared.element_confidence, 3, 2);
 }

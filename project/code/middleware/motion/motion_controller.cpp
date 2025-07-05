@@ -16,9 +16,11 @@ MotionController::MotionController(const Config& config) :
 
     speed_pid_.connect_inputs(&target_speed, &current_speed_, &target_speed_accel);
     speed_pid_.connect_outputs(&speed_pid_output_);
+    direction_pid_.connect_inputs(&target_direction, &current_direction_, &target_direction_accel);
+    direction_pid_.connect_outputs(&direction_pid_output_);
     left_motor_.connect_inputs(&left_motor_duty_);
     right_motor_.connect_inputs(&right_motor_duty_);
-    servo_.connect_inputs(&servo_duty_);
+    servo_.connect_inputs(&servo_dir_);
     setup_debug_vars();
 }
 
@@ -54,7 +56,7 @@ void MotionController::reset()
     direction_pid_output_ = 0.0f;
     left_motor_duty_ = 0;
     right_motor_duty_ = 0;
-    servo_duty_ = 0;
+    servo_dir_ = 0;
 }
 
 void MotionController::update()
@@ -70,9 +72,12 @@ void MotionController::update()
     current_speed_ = (left_encoder_count_ + right_encoder_count_) / 2.0f;
 
     speed_pid_.update();
+    direction_pid_.update();
 
     left_motor_duty_ = static_cast<int16>(speed_pid_output_);
     right_motor_duty_ = static_cast<int16>(speed_pid_output_);
+
+    servo_dir_ = direction_pid_output_;
 
     left_motor_.update();
     right_motor_.update();
@@ -93,12 +98,12 @@ void MotionController::connect_inputs(
 
 void MotionController::setup_debug_vars()
 {
-    speed_pid_.export_debug_vars(this, "pid_s.");
-    direction_pid_.export_debug_vars(this, "pid_d.");
-    add_debug_var("lenc", make_readonly_var("lenc", &left_encoder_count_));
-    add_debug_var("renc", make_readonly_var("renc", &right_encoder_count_));
-    add_debug_var("spd", make_readonly_var("spd", &current_speed_));
-    add_debug_var("lpwm", make_readonly_var("lpwm", &left_motor_duty_));
-    add_debug_var("rpwm", make_readonly_var("rpwm", &right_motor_duty_));
-    add_debug_var("servopwm", make_debug_var("servopwm", &servo_duty_));
+    // speed_pid_.export_debug_vars(this, "pid_s.");
+    // direction_pid_.export_debug_vars(this, "pid_d.");
+    // add_debug_var("lenc", make_readonly_var("lenc", &left_encoder_count_));
+    // add_debug_var("renc", make_readonly_var("renc", &right_encoder_count_));
+    // add_debug_var("spd", make_readonly_var("spd", &current_speed_));
+    // add_debug_var("lpwm", make_readonly_var("lpwm", &left_motor_duty_));
+    // add_debug_var("rpwm", make_readonly_var("rpwm", &right_motor_duty_));
+    // add_debug_var("servopwm", make_debug_var("servopwm", &servo_dir_));
 }

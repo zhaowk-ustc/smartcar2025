@@ -32,18 +32,16 @@ public:
         pwm_set_duty(pwm_channel_, (SERVO_MIN_DUTY + SERVO_MAX_DUTY) / 2);
     }
 
-    void connect_inputs(const uint16* input_duty)
+    void connect_inputs(const float* input_dir)
     {
-        input_duty_ = input_duty;
+        input_dir_ = input_dir;
     }
 
     void update() override
     {
-        auto duty = *input_duty_;
+        auto dir = *input_dir_;
         // 限制速度在允许范围内
-        if (duty > SERVO_MAX_DUTY) duty = SERVO_MAX_DUTY;
-        if (duty < SERVO_MIN_DUTY) duty = SERVO_MIN_DUTY;
-
+        auto duty = duty_mapping(dir);
         pwm_set_duty(pwm_channel_, duty);
 
     }
@@ -53,12 +51,20 @@ private:
 
 
     // 运行参数
-    const uint16* input_duty_;
+    const float* input_dir_;
 
     // 常量定义
     static constexpr uint16 SERVO_FREQ = 200;
     static constexpr uint16 SERVO_MAX_DUTY = 1800 * SERVO_FREQ / 100;
     static constexpr uint16 SERVO_MIN_DUTY = 1400 * SERVO_FREQ / 100;
+
+    int duty_mapping(float dir)
+    {
+        // 将方向映射到舵机的占空比范围
+        if (dir < -1.0f) dir = -1.0f;
+        if (dir > 1.0f) dir = 1.0f;
+        return static_cast<int>(SERVO_MIN_DUTY + (SERVO_MAX_DUTY - SERVO_MIN_DUTY) * (dir + 1.0f) / 2.0f);
+    }
 };
 
 #endif // SERVO_H

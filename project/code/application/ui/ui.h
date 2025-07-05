@@ -76,6 +76,7 @@ private:
     void select_camera_display_mode();
     static constexpr uint16 camera_display_x_ = 18 * 8; // 摄像头显示的起始X坐标
     void display_camera();
+    void display_overlay(); // 显示拓扑图叠加层
 
     bool enabled_ = true; // UI是否启用
 };
