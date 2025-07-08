@@ -3,9 +3,9 @@
 
 
 #pragma location = 0x28031064
-uint8_t calibrated_image[calibrated_height * calibrated_width];
+uint8_t calibrated_image[aligned_calibrated_size];
 #pragma location = 0x28031FB4
-uint8_t calibrated_binary_image[calibrated_height * calibrated_width];
+uint8_t calibrated_binary_image[aligned_calibrated_size];
 
 #pragma location = 0x28032F04
 VisionConfigShared vision_config_shared = {
@@ -18,8 +18,7 @@ VisionOutputsShared vision_outputs_shared = {
 
 };
 
-#pragma location = 0x28033100
+#pragma location = 0x28035000
 VisionDebugShared vision_debug_shared = {
-    .left_bounds = {},
-    .right_bounds = {}
+
 };

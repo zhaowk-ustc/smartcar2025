@@ -9,7 +9,6 @@ void image_calibration(const uint8* source_image_data, uint8* dest_image_data)
         dest_image_data[idx] = source_image_data[calibration_map[idx]];
     }
 
-    // SCB_CleanDCache_by_Addr(dest_image_data, 49 * 80);
 }
 
 const uint16 calibration_map[80 * 49] =

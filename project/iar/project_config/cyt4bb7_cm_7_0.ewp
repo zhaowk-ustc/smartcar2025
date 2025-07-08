@@ -1215,44 +1215,68 @@
             </group>
             <group>
                 <name>vision</name>
-                <file>
-                    <name>$PROJ_DIR$\..\..\code\middleware\vision\binarization.cpp</name>
-                </file>
-                <file>
-                    <name>$PROJ_DIR$\..\..\code\middleware\vision\binarization.h</name>
-                </file>
-                <file>
-                    <name>$PROJ_DIR$\..\..\code\middleware\vision\calibration.cpp</name>
-                </file>
-                <file>
-                    <name>$PROJ_DIR$\..\..\code\middleware\vision\calibration.h</name>
-                </file>
-                <file>
-                    <name>$PROJ_DIR$\..\..\code\middleware\vision\line_tracking.cpp</name>
-                </file>
-                <file>
-                    <name>$PROJ_DIR$\..\..\code\middleware\vision\line_tracking.h</name>
-                </file>
-                <file>
-                    <name>$PROJ_DIR$\..\..\code\middleware\vision\point.h</name>
-                </file>
-                <file>
-                    <name>$PROJ_DIR$\..\..\code\middleware\vision\road_element.cpp</name>
-                </file>
-                <file>
-                    <name>$PROJ_DIR$\..\..\code\middleware\vision\road_element.h</name>
-                </file>
+                <group>
+                    <name>common</name>
+                    <file>
+                        <name>$PROJ_DIR$\..\..\code\middleware\vision\common\point.h</name>
+                    </file>
+                    <file>
+                        <name>$PROJ_DIR$\..\..\code\middleware\vision\common\utils.cpp</name>
+                    </file>
+                    <file>
+                        <name>$PROJ_DIR$\..\..\code\middleware\vision\common\utils.h</name>
+                    </file>
+                </group>
+                <group>
+                    <name>element</name>
+                </group>
+                <group>
+                    <name>preprocess</name>
+                    <file>
+                        <name>$PROJ_DIR$\..\..\code\middleware\vision\preprocess\binarization.cpp</name>
+                    </file>
+                    <file>
+                        <name>$PROJ_DIR$\..\..\code\middleware\vision\preprocess\binarization.h</name>
+                    </file>
+                    <file>
+                        <name>$PROJ_DIR$\..\..\code\middleware\vision\preprocess\calibration.cpp</name>
+                    </file>
+                    <file>
+                        <name>$PROJ_DIR$\..\..\code\middleware\vision\preprocess\calibration.h</name>
+                    </file>
+                    <file>
+                        <name>$PROJ_DIR$\..\..\code\middleware\vision\preprocess\perspective.cpp</name>
+                    </file>
+                    <file>
+                        <name>$PROJ_DIR$\..\..\code\middleware\vision\preprocess\perspective.h</name>
+                    </file>
+                </group>
+                <group>
+                    <name>track</name>
+                    <file>
+                        <name>$PROJ_DIR$\..\..\code\middleware\vision\track\fill.cpp</name>
+                    </file>
+                    <file>
+                        <name>$PROJ_DIR$\..\..\code\middleware\vision\track\fill.h</name>
+                    </file>
+                    <file>
+                        <name>$PROJ_DIR$\..\..\code\middleware\vision\track\line_tracking.cpp</name>
+                    </file>
+                    <file>
+                        <name>$PROJ_DIR$\..\..\code\middleware\vision\track\line_tracking.h</name>
+                    </file>
+                    <file>
+                        <name>$PROJ_DIR$\..\..\code\middleware\vision\track\line_tracking_graph.cpp</name>
+                    </file>
+                    <file>
+                        <name>$PROJ_DIR$\..\..\code\middleware\vision\track\line_tracking_graph.h</name>
+                    </file>
+                </group>
                 <file>
                     <name>$PROJ_DIR$\..\..\code\middleware\vision\vision_system.cpp</name>
                 </file>
                 <file>
                     <name>$PROJ_DIR$\..\..\code\middleware\vision\vision_system.h</name>
-                </file>
-                <file>
-                    <name>$PROJ_DIR$\..\..\code\middleware\vision\vision_utils.cpp</name>
-                </file>
-                <file>
-                    <name>$PROJ_DIR$\..\..\code\middleware\vision\vision_utils.h</name>
                 </file>
             </group>
             <file>

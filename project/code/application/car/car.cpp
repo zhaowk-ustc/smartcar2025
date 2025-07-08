@@ -1,6 +1,5 @@
 #include "car.h"
 #include "multicore/core_shared.h"
-#include "middleware/vision/road_element.h"
 #include <cmath>
 
 Car::Car(const Car::Config& config)
@@ -60,8 +59,8 @@ void Car::update_pit20ms()
 
 void Car::setup_debug_vars()
 {
-    motion_controller.export_debug_vars(&debugger, "");
-    ui.export_debug_vars(&debugger, "");
+    // motion_controller.export_debug_vars(&debugger, "");
+    // ui.export_debug_vars(&debugger, "");
 
     // 添加调试变量
     add_debug_var("target_speed", make_debug_var("target_speed", &target_speed));
@@ -74,6 +73,7 @@ void Car::setup_debug_vars()
 
     // 复制到ui
     ui.import_vars(debugger.list_var_ptrs());
+
 }
 
 void Car::update_multicore()

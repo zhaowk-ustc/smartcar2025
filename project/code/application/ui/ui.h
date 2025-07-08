@@ -3,8 +3,10 @@
 
 #include "zf_common_headfile.h"
 #include "../debugger/debugger.h"
+#include "middleware/vision/track/line_tracking_graph.h"
 #include <vector>
 #include <string>
+#include <cmath>
 
 class UI : public IDebuggable
 {
@@ -77,6 +79,14 @@ private:
     static constexpr uint16 camera_display_x_ = 18 * 8; // 摄像头显示的起始X坐标
     void display_camera();
     void display_overlay(); // 显示拓扑图叠加层
+    
+    // 拓扑图可视化相关函数
+    void draw_graph_overlay(const LineTrackingGraph& graph);
+    void draw_graph_nodes(const LineTrackingGraph& graph);
+    void draw_graph_edges(const LineTrackingGraph& graph);
+    void draw_graph_root(const LineTrackingGraph& graph);
+    void display_graph_stats(const LineTrackingGraph& graph);
+    void draw_square(uint16 center_x, uint16 center_y, uint8 size, uint16 color);
 
     bool enabled_ = true; // UI是否启用
 };
