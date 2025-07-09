@@ -8,7 +8,6 @@ using namespace std;
 #include "line_tracking_graph.h"
 #include "line_tracking.h"
 #include "fill.h"
-#include "multicore/core_shared.h"
 
 
 void create_line_tracking_graph(
@@ -20,7 +19,11 @@ void create_line_tracking_graph(
     int dist_threshold,
     float rdp_threshold,
     int branch_merge_threshold,
-    int min_branch_length
+    int min_branch_length,
+    uint8_t* ttl_map,
+    uint8_t* depth_map,
+    uint8_t* visited,
+    int16_t* point_to_node_map
 )
 {
     // 先清理图的状态
@@ -41,22 +44,11 @@ void create_line_tracking_graph(
     }
 
     // Step 1: 主连通域膨胀mask，标记邻域
-    static uint8_t ttl_map[calibrated_size];
     auto seed_link_points = search_seed_points(image, image_w, image_h,
         seed_point,
         search_seed_radius,
-        ttl_map);
-
-    // 检查ttl_map的使用情况，防止内存过度使用
-    static int count;
-    count = 0;
-    for (auto i = 0;i < image_w * image_h;i++)
-    {
-        if (ttl_map[i] > 0)
-        {
-            count++;
-        }
-    }
+        ttl_map,
+        visited);
 
     // 提取seed_points和link_points
     std::vector<Point> seed_points;
@@ -68,12 +60,10 @@ void create_line_tracking_graph(
     }
 
     // Step 2: 对每个白点进行染色
-    static uint8_t depth_map[calibrated_size];
     std::vector<Point> final_link_points;
     get_depth_map(image, depth_map, image_w, image_h, seed_points);
 
     // Step 3: 生成初始拓扑图
-    static int16_t point_to_node_map[calibrated_size];
     build_graph(graph, depth_map, image_w, image_h,
         seed_link_points, point_to_node_map, dist_threshold);
 
@@ -94,6 +84,12 @@ void create_line_tracking_graph(
         // 跳过已删除的节点和START节点
         if (node.type() == NodeType::DELETED || node.type() == NodeType::START)
         {
+            continue;
+        }
+
+        if (node.predecessor() == -2)
+        {
+            node.set_type(NodeType::DELETED);
             continue;
         }
 
@@ -154,7 +150,8 @@ vector<pair<Point, Point>> search_seed_points(
     int image_h,
     Point seed_point,
     const uint8_t ttl,
-    uint8_t* ttl_map
+    uint8_t* ttl_map,
+    uint8_t* visited
 )
 {
     memset(ttl_map, 0, image_w * image_h * sizeof(uint8_t));
@@ -203,15 +200,15 @@ vector<pair<Point, Point>> search_seed_points(
                     // 发现新的连通域
                     Point new_seed(nx, ny);
 
-                    static uint8_t visited[calibrated_size];
-                    memset(visited, 0, calibrated_size);
+                    memset(visited, 0, image_w * image_h);
 
                     vector<Point> current_layer;
                     vector<Point> next_layer;
                     current_layer.push_back(new_seed);
-                    auto current_layer_ttl = ttl_map[new_seed.y * image_w + new_seed.x];
+                    bool found = false;
+                    vector<Point> manhattan_nearest;
                     // 从当前点开始，沿着ttl梯度上升方向回溯
-                    while (current_layer_ttl < ttl)
+                    while (!found)
                     {
                         // 检查当前点周围8邻域，找到ttl值更高的点
                         for (auto pt : current_layer)
@@ -223,25 +220,28 @@ vector<pair<Point, Point>> search_seed_points(
 
                                 if (inBounds(tx, ty, image_w, image_h)
                                     && visited[ty * image_w + tx] == 0
-                                    && ttl_map[ty * image_w + tx] > current_layer_ttl
                                     )
                                 {
+                                    if (ttl_map[ty * image_w + tx] == ttl)
+                                    {
+                                        found = true;
+                                        manhattan_nearest.push_back(Point(tx, ty));
+                                    }
                                     visited[ty * image_w + tx] = 1;
                                     next_layer.push_back(Point(tx, ty));
                                 }
                             }
                         }
-                        current_layer_ttl++;
                         current_layer = next_layer;
                         next_layer.clear();
                     }
                     // 提取出当前层欧氏距离最近的点
                     Point euclidean_nearest;
-                    float nearest_dist = -1;
-                    for (auto pt : current_layer)
+                    float nearest_dist = float(image_w + image_h); // 初始化为最大距离
+                    for (auto pt : manhattan_nearest)
                     {
                         float dist = euclideanDist(new_seed, pt);
-                        if (dist > nearest_dist)
+                        if (dist < nearest_dist)
                         {
                             nearest_dist = dist;
                             euclidean_nearest = pt;
@@ -309,20 +309,9 @@ static void build_region_graph(
     int16_t* point_to_node_map
 )
 {
-    // 添加安全检查
-    if (graph.size() >= 500)
-    {
-        // 节点数量过多，可能存在无限循环问题
-        return;
-    }
-
     // 1.1 为主连通域进行层次遍历建图
     vector<Point> current_layer;
     vector<Point> prev_layer; // 用于存储上一层的像素点
-
-    // 限制最大处理层数，避免无限循环
-    int max_layers = 100;
-    int layer_count = 0;
 
     // 创建起始节点
     int start_node_idx = graph.addNode(seed);
@@ -334,9 +323,8 @@ static void build_region_graph(
     point_to_node_map[seed.y * image_w + seed.x] = start_node_idx;
     prev_layer.push_back(seed);
 
-    while (!prev_layer.empty() && layer_count < max_layers)
+    while (!prev_layer.empty())
     {
-        layer_count++;
         // 清空当前层
         current_layer.clear();
         int16_t current_node_idx = -1; // 当前处理的节点
@@ -395,7 +383,6 @@ void build_graph(
     uint8_t dist_thresh
 )
 {
-
     // 初始化节点映射数组，-1表示该位置没有节点
     for (int i = 0; i < image_w * image_h; ++i)
     {

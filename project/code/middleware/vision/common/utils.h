@@ -1,6 +1,5 @@
 #pragma once
 
-#include "zf_common_headfile.h"
 #include <vector>
 #include <utility>
 #include <cmath>
@@ -33,7 +32,7 @@ float linear_interpolation(float x1, float y1, float x2, float y2, float x);
 // 使用示例：
 //   vector<Point> boundary_points = {Point(20, 30), Point(25, 35), Point(30, 40)};
 //   Point white_point = find_white_point(image, 80, 60, boundary_points, SearchDirection::UP, 10);
-Point find_white_point(const uint8* image, uint16 width, uint16 height,
+Point find_white_point(const uint8_t* image, uint16_t width, uint16_t height,
     const vector<Point>& start_points, SearchDirection direction,
     int max_distance = 0);
 
@@ -46,7 +45,7 @@ inline bool inBounds(int x, int y, int w, int h)
 // 计算两点欧氏距离
 inline float euclideanDist(const Point& a, const Point& b)
 {
-    return std::sqrt((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y));
+    return std::sqrtf(static_cast<float>(a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y));
 }
 
 // 计算两点曼哈顿距离（直角距离）

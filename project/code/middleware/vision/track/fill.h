@@ -1,6 +1,5 @@
 #pragma once
 
-#include "zf_common_headfile.h"
 #include "../common/point.h"
 
 // 通用的连通域填充函数

@@ -1229,6 +1229,18 @@
                 </group>
                 <group>
                     <name>element</name>
+                    <file>
+                        <name>$PROJ_DIR$\..\..\code\middleware\vision\element\element.cpp</name>
+                    </file>
+                    <file>
+                        <name>$PROJ_DIR$\..\..\code\middleware\vision\element\element.h</name>
+                    </file>
+                    <file>
+                        <name>$PROJ_DIR$\..\..\code\middleware\vision\element\track_path.cpp</name>
+                    </file>
+                    <file>
+                        <name>$PROJ_DIR$\..\..\code\middleware\vision\element\track_path.h</name>
+                    </file>
                 </group>
                 <group>
                     <name>preprocess</name>
@@ -1243,12 +1255,6 @@
                     </file>
                     <file>
                         <name>$PROJ_DIR$\..\..\code\middleware\vision\preprocess\calibration.h</name>
-                    </file>
-                    <file>
-                        <name>$PROJ_DIR$\..\..\code\middleware\vision\preprocess\perspective.cpp</name>
-                    </file>
-                    <file>
-                        <name>$PROJ_DIR$\..\..\code\middleware\vision\preprocess\perspective.h</name>
                     </file>
                 </group>
                 <group>

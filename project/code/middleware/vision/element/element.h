@@ -1,0 +1,19 @@
+#pragma once
+
+
+#include "../track/line_tracking_graph.h"
+#include <utility>
+#include <complex>
+
+using namespace std;
+
+// 元素类型
+enum class ElementType : int8_t
+{
+    NORMAL,
+    CROSS,      // 十字路口
+    ROUNDABOUT, // 环岛
+    UNCERTAIN,  // 不确定
+};
+
+pair<ElementType, int> detect_branch_element(const Point2f& in_vec, const vector<Point2f>& out_vecs);

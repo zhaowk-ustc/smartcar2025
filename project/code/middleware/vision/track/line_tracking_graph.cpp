@@ -18,7 +18,7 @@ void LineTrackingGraph::simplify(float rdp_collinearity_threshold, int branch_me
     // 执行简化 - 优化的执行顺序：
     // 1. 先进行RDP简化，减少冗余节点，为后续操作提供更清晰的图结构
     // 2. 然后删除短分支，避免在分支合并后产生新的短分支
-    // 3. 最后合并相近分支，因为前面的操作可能会产生新的相近分支点
+    // 3. 最后合并相近分支
     rdp_simplify();
     delete_short_branch();
     merge_nearby_branches();
@@ -34,6 +34,7 @@ void LineTrackingGraph::rdp_simplify()
     {
         auto& node = nodes[i];
         if (node.type() == NodeType::DELETED) continue; // 跳过已删除的节点
+        if (node.predecessor() == -2) continue; // 跳过已删除的节点
 
         auto successors = node.successors();
 
@@ -49,6 +50,7 @@ void LineTrackingGraph::rdp_simplify()
     {
         auto& branch_node = nodes[branch_idx];
         if (branch_node.type() == NodeType::DELETED) continue; // 跳过已删除的节点
+        if (branch_node.predecessor() == -2) continue; // 跳过已删除的节点
 
         auto successors = branch_node.successors();
 
@@ -84,6 +86,7 @@ std::vector<int> LineTrackingGraph::collectSegment(int start_idx, int first_idx)
     {
         auto& node = nodes[current_idx];
         if (node.type() == NodeType::DELETED) break; // 跳过已删除的节点
+        if (node.predecessor() == -2) continue; // 跳过已删除的节点
 
         segment.push_back(current_idx);
         auto successors = node.successors();
@@ -230,34 +233,57 @@ void LineTrackingGraph::merge_nearby_branches()
 
                     if (distance <= branch_merge_threshold_)
                     {
-                        // 首先从end_idx的前驱中移除start_idx（如果存在）
-                        nodes[end_idx].set_predecessor(nodes[start_idx].predecessor());
+                        // 新建一个节点，数据为start_idx和end_idx的数据平均值
+                        Point start_point = nodes[start_idx].data();
+                        Point end_point = nodes[end_idx].data();
+                        Point new_point;
+                        new_point.x = (start_point.x + end_point.x) / 2;
+                        new_point.y = (start_point.y + end_point.y) / 2;
 
-                        // 将start_idx的所有后继转移到end_idx
+                        int start_pred = nodes[start_idx].predecessor();
+                        // 新节点的前驱为start_idx的前驱
+                        int new_node_idx = addNode(new_point, start_pred, NodeType::NORMAL);
+
+                        // 新节点的后继为start_idx和end_idx的所有后继（去重，且不包含已删除节点）
                         auto start_successors = nodes[start_idx].successors();
-                        for (int successor_idx : start_successors)
-                        {
-                            if (successor_idx != end_idx) // 避免自环
-                            {
-                                // 更新后继节点的前驱指向end_idx
-                                nodes[successor_idx].set_predecessor(end_idx);
-                                // 添加到end_idx的后继列表
-                                nodes[end_idx].add_successor(successor_idx);
+                        auto end_successors = nodes[end_idx].successors();
+                        for (int s : start_successors) {
+                            if (s != end_idx && nodes[s].predecessor() != -2) {
+                                nodes[new_node_idx].add_successor(s);
+                                nodes[s].set_predecessor(new_node_idx);
+                            }
+                        }
+                        for (int s : end_successors) {
+                            if (s != start_idx && nodes[s].predecessor() != -2) {
+                                nodes[new_node_idx].add_successor(s);
+                                nodes[s].set_predecessor(new_node_idx);
                             }
                         }
 
-                        // 如果start_idx有前驱，更新前驱的后继指向end_idx
-                        int start_pred = nodes[start_idx].predecessor();
+                        // 如果start_idx有前驱，更新前驱的后继指向新节点
                         if (start_pred >= 0 && start_pred < node_count)
                         {
                             nodes[start_pred].remove_successor(start_idx);
-                            nodes[start_pred].add_successor(end_idx);
+                            nodes[start_pred].add_successor(new_node_idx);
                         }
 
-                        // 删除段中间的所有节点（包括start_idx）
-                        for (int i = 0; i < segment.size() - 1; ++i)
+                        // 如果end_idx有前驱，且不是start_idx，更新其前驱的后继指向新节点
+                        int end_pred = nodes[end_idx].predecessor();
+                        if (end_pred >= 0 && end_pred < node_count && end_pred != start_idx)
                         {
-                            // printf("Deleting intermediate node %d\n", segment[i]);
+                            nodes[end_pred].remove_successor(end_idx);
+                            nodes[end_pred].add_successor(new_node_idx);
+                        }
+
+                        // 标记start_idx和end_idx为已删除
+                        nodes[start_idx].set_predecessor(-2);
+                        nodes[start_idx].set_type(NodeType::DELETED);
+                        nodes[end_idx].set_predecessor(-2);
+                        nodes[end_idx].set_type(NodeType::DELETED);
+
+                        // 删除段中间的所有节点（不包括两端）
+                        for (int i = 1; i < segment.size() - 1; ++i)
+                        {
                             nodes[segment[i]].set_predecessor(-2);
                             nodes[segment[i]].set_type(NodeType::DELETED);
                         }
@@ -270,10 +296,8 @@ void LineTrackingGraph::merge_nearby_branches()
 
 void LineTrackingGraph::delete_short_branch()
 {
-    // 删除过短的分支（从终点开始回溯检查）
-    // printf("Deleting short branches with min length %d...\n", min_branch_length_);
 
-    // 找到所有终点节点并删除短分支，只需要遍历一次
+    // 找到所有终点节点并删除短分支
     for (int i = 0; i < node_count; ++i)
     {
         auto& node = nodes[i];
@@ -368,11 +392,11 @@ int LineTrackingGraph::calculateBranchLengthFromTerminal(int terminal_idx)
             Point pred_point = nodes[pred_idx].data();
             total_manhattan_length += manhattanDist(current_point, pred_point);
 
-            // 检查前驱节点是否是分支点
+            // 检查前驱节点是否是分支点或START点
             auto pred_successors = nodes[pred_idx].successors();
-            if (pred_successors.size() > 1)
+            if (pred_successors.size() > 1 || pred_idx == start_index)
             {
-                // 到达分支点，停止计算
+                // 到达分支点或START点，停止计算
                 break;
             }
 
@@ -399,7 +423,7 @@ void LineTrackingGraph::deletePathFromTerminal(int terminal_idx)
     while (current_idx >= 0 && current_idx < node_count)
     {
         auto& node = nodes[current_idx];
-        if (node.predecessor() == -2) break; // 已删除的节点
+        // if (node.predecessor() == -2) break; // 已删除的节点
 
         int pred_idx = node.predecessor();
 
@@ -413,11 +437,11 @@ void LineTrackingGraph::deletePathFromTerminal(int terminal_idx)
             // 从前驱节点的后继列表中移除当前节点
             nodes[pred_idx].remove_successor(current_idx);
 
-            // 检查前驱节点是否是分支点
+            // 检查前驱节点是否是分支点或START点
             auto pred_successors = nodes[pred_idx].successors();
-            if (pred_successors.size() > 1)
+            if (pred_successors.size() > 1 || pred_idx == start_index)
             {
-                // 到达分支点，停止删除
+                // 到达分支点或START点，停止删除
                 break;
             }
 

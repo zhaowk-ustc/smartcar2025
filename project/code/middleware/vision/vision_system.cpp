@@ -3,12 +3,9 @@
 #include "multicore/core_shared.h"
 #include "preprocess/calibration.h"
 #include "preprocess/binarization.h"
-#include "preprocess/perspective.h"
+#include "preprocess/calibration.h"
 #include "track/line_tracking.h"
-
-#include "track/line_tracking.h"
-
-static uint8 tmp_image[3920];
+#include "element/track_path.h"
 
 VisionSystem::VisionSystem(const Config& config)
 {
@@ -34,19 +31,34 @@ void VisionSystem::update()
     }
     mt9v03x_finish_flag = 0;
 
-    image_calibration(mt9v03x_image[0], tmp_image);
-    perspective_mapping(tmp_image, calibrated_image);
+    image_calibration(calibrated_image, mt9v03x_image[0]);
 
-    image_binarization_with_mask(calibrated_image, calibrated_binary_image, perspective_mask, calibrated_size);
+    image_binarization_with_mask(calibrated_image, calibrated_binary_image, calibration_mask, calibrated_size);
 
-    static LineTrackingGraph graph;
+    static LineTrackingGraph vision_static_graph;
+    create_line_tracking_graph(
+        vision_static_graph,
+        calibrated_binary_image, calibrated_width, calibrated_height,
+        10, //search_seed_radius
+        10, //dist_threshold
+        6, //rdp_threshold
+        12, //branch_merge_threshold
+        6, //min_branch_length
+        vision_ttl_map,
+        vision_depth_map,
+        vision_visited,
+        vision_point_to_node_map);
 
-    create_line_tracking_graph(graph, calibrated_binary_image, calibrated_width, calibrated_height);
+    static TrackPath vision_static_track_path;
+    vision_static_track_path.clear();
+
+    extract_path(vision_static_graph, vision_static_track_path);
 
     // 计算循迹偏差
     // vision_outputs_shared.bias = get_bias(road_line, element_result, 80);
-    vision_outputs_shared.graph = graph;
-
+    memcpy(&vision_line_tracking_graph, &vision_static_graph, sizeof(vision_static_graph));
+    memcpy(&vision_outputs_shared.track_path,&vision_static_track_path,sizeof(vision_static_track_path));
+    SCB_CleanDCache_by_Addr((void*)&vision_line_tracking_graph, sizeof(vision_line_tracking_graph));
     SCB_CleanDCache_by_Addr((void*)&vision_debug_shared, sizeof(vision_debug_shared));
     SCB_CleanDCache_by_Addr((void*)&vision_outputs_shared, sizeof(vision_outputs_shared));
 }

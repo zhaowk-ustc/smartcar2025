@@ -109,7 +109,7 @@ void UI::display_camera()
             height = calibrated_height;
             SCB_InvalidateDCache_by_Addr((void*)frame_buffer, width * height);
             // 直接显示原始大小
-            ips114_show_gray_image(camera_display_x_, 0, frame_buffer, width, height, width, height, 0);
+            ips114_show_gray_image(camera_display_x_, 0, frame_buffer, width, height, width , height , 0);
             break;
         case CameraDisplayMode::CALIBRATED_BINARIZED:
             frame_buffer = calibrated_binary_image;
@@ -117,7 +117,7 @@ void UI::display_camera()
             height = calibrated_height;
             SCB_InvalidateDCache_by_Addr((void*)frame_buffer, width * height);
             // 直接显示原始大小
-            ips114_show_gray_image(camera_display_x_, 0, frame_buffer, width, height, width, height, 0);
+            ips114_show_gray_image(camera_display_x_, 0, frame_buffer, width, height, width , height , 0);
             break;
         default:
             break;
@@ -129,10 +129,9 @@ void UI::display_overlay()
     SCB_InvalidateDCache_by_Addr((void*)&vision_debug_shared, sizeof(vision_debug_shared));
     SCB_InvalidateDCache_by_Addr((void*)&vision_outputs_shared, sizeof(vision_outputs_shared));
 
-    // 直接使用共享内存中的graph，避免拷贝
-    const LineTrackingGraph& graph = vision_outputs_shared.graph;
-    // 绘制拓扑图
-    draw_graph_overlay(graph);
+    static LineTrackingGraph ui_display_graph;
+    memcpy(&ui_display_graph, &vision_line_tracking_graph, sizeof(vision_line_tracking_graph));
+    draw_graph_overlay(ui_display_graph);
 }
 
 // 绘制拓扑图叠加层
@@ -159,9 +158,9 @@ void UI::draw_graph_nodes(const LineTrackingGraph& graph)
         const GraphNode& node = graph.getNode(i);
         Point pt = node.data();
 
-        // 将图像坐标转换为屏幕坐标
-        uint16 screen_x = camera_display_x_ + pt.x;
-        uint16 screen_y = pt.y;
+        // 图像坐标缩放
+        uint16 screen_x = camera_display_x_ + pt.x ;
+        uint16 screen_y = pt.y ;
 
         // 根据节点类型选择不同的绘制方式
         switch (node.type())
@@ -192,9 +191,12 @@ void UI::draw_graph_edges(const LineTrackingGraph& graph)
         const GraphNode& node = graph.getNode(i);
         Point pt = node.data();
 
-        // 将图像坐标转换为屏幕坐标
-        uint16 screen_x = camera_display_x_ + pt.x;
-        uint16 screen_y = pt.y;
+        if (node.type() == NodeType::DELETED)
+            continue; // 跳过已删除的节点
+
+        // 图像坐标缩放
+        uint16 screen_x = camera_display_x_ + pt.x ;
+        uint16 screen_y = pt.y ;
 
         // 绘制到后继节点的连线
         vector<int16_t> successors = node.successors();
@@ -205,8 +207,8 @@ void UI::draw_graph_edges(const LineTrackingGraph& graph)
                 const GraphNode& succ_node = graph.getNode(succ_idx);
                 Point succ_pt = succ_node.data();
 
-                uint16 succ_screen_x = camera_display_x_ + succ_pt.x;
-                uint16 succ_screen_y = succ_pt.y;
+                uint16 succ_screen_x = camera_display_x_ + succ_pt.x ;
+                uint16 succ_screen_y = succ_pt.y ;
 
                 // 绘制连线
                 ips114_draw_line(screen_x, screen_y, succ_screen_x, succ_screen_y, RGB565_YELLOW);
@@ -222,8 +224,8 @@ void UI::draw_graph_root(const LineTrackingGraph& graph)
     {
         const GraphNode& root_node = graph.getNode(graph.root());
         Point root_pt = root_node.data();
-        uint16 root_screen_x = camera_display_x_ + root_pt.x;
-        uint16 root_screen_y = root_pt.y;
+        uint16 root_screen_x = camera_display_x_ + root_pt.x ;
+        uint16 root_screen_y = root_pt.y ;
 
         // 在根节点周围绘制一个大方框
         draw_square(root_screen_x, root_screen_y, 6, RGB565_BLUE);
@@ -268,37 +270,37 @@ void UI::display_graph_stats(const LineTrackingGraph& graph)
 
     // 显示总节点数
     snprintf(stats_buffer, sizeof(stats_buffer), "Nodes: %d", (int)graph.size());
-    ips114_show_string(camera_display_x_, calibrated_height, stats_buffer);
+    screen_show_string(camera_display_x_, calibrated_height , stats_buffer, 10);
 
     // 显示各类型节点数量
     snprintf(stats_buffer, sizeof(stats_buffer), "Normal: %d", normal_count);
-    ips114_show_string(camera_display_x_, calibrated_height + 16, stats_buffer);
+    screen_show_string(camera_display_x_, calibrated_height  + 16, stats_buffer, 10);
 
     snprintf(stats_buffer, sizeof(stats_buffer), "Branch: %d", branch_count);
-    ips114_show_string(camera_display_x_, calibrated_height + 32, stats_buffer);
+    screen_show_string(camera_display_x_, calibrated_height  + 32, stats_buffer, 10);
 
     snprintf(stats_buffer, sizeof(stats_buffer), "End: %d", endpoint_count);
-    ips114_show_string(camera_display_x_, calibrated_height + 48, stats_buffer);
-    
+    screen_show_string(camera_display_x_, calibrated_height  + 48, stats_buffer, 10);
+
     snprintf(stats_buffer, sizeof(stats_buffer), "Start: %d", start_count);
-    ips114_show_string(camera_display_x_, calibrated_height + 64, stats_buffer);
+    screen_show_string(camera_display_x_, calibrated_height  + 64, stats_buffer, 10);
 
     // 显示根节点(START)坐标信息
     if (graph.root() >= 0 && graph.root() < graph.size())
     {
         const GraphNode& root_node = graph.getNode(graph.root());
         Point root_pt = root_node.data();
-        
+
         // 直接显示坐标，根节点即START节点
         snprintf(stats_buffer, sizeof(stats_buffer), "(%d,%d)", root_pt.x, root_pt.y);
-        ips114_show_string(camera_display_x_, calibrated_height + 80, stats_buffer);
+        // screen_show_string(camera_display_x_, calibrated_height  + 80, stats_buffer, 10);
     }
 }
 
 // 绘制方块的辅助函数
 void UI::draw_square(uint16 center_x, uint16 center_y, uint8 size, uint16 color)
 {
-    int half_size = size / 2;
+    int half_size = size ;
 
     // 绘制方块的四条边
     for (int i = -half_size; i <= half_size; ++i)

@@ -1,11 +1,15 @@
 #ifndef CALIBRATION_H
 #define CALIBRATION_H
 
-#include "zf_common_headfile.h"
+#include <stdint.h>
 
-// 图像校正函数
-// 参数：source_image_data - 原始图像数据指针
-//      dest_image_data - 校正后图像数据指针
-void image_calibration(const uint8* source_image_data, uint8* dest_image_data);
+constexpr uint16_t calibrated_width = 70;
+constexpr uint16_t calibrated_height = 53;
+constexpr uint16_t calibrated_size = 70 * 53;
+constexpr uint16_t aligned_calibrated_size = 70 * 54;
+
+void image_calibration(uint8_t* dest_image_data, const uint8_t* source_image_data);
+
+extern const uint8_t calibration_mask[3710];
 
 #endif

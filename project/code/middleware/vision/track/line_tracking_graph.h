@@ -96,7 +96,6 @@ private:
     int16_t successors_[3];   // 后继节点的索引
     int16_t predecessor_;      // 前继节点的索引
     NodeType type_;
-
 };
 
 
@@ -152,7 +151,7 @@ public:
     void setMinBranchLength(int length) { min_branch_length_ = length; }
 
 private:
-    static constexpr size_t MAX_NODES = 255;
+    static constexpr size_t MAX_NODES = 512;
     GraphNode nodes[MAX_NODES];
     size_t node_count = 0;      // 当前节点数量
     int start_index = 0;    // 起始节点的索引

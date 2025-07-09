@@ -2,15 +2,18 @@
 #include "zf_common_headfile.h"
 #include "middleware/vision/common/point.h"
 #include "middleware/vision/track/line_tracking.h"
-
-constexpr uint16_t calibrated_width = 57;
-constexpr uint16_t calibrated_height = 31;
-constexpr uint16_t calibrated_size = calibrated_width * calibrated_height;
-constexpr uint16_t aligned_calibrated_size = 80 * 49;
+#include "middleware/vision/element/track_path.h"
+#include "middleware/vision/preprocess/calibration.h"
 
 extern uint8_t mt9v03x_image[MT9V03X_H][MT9V03X_W];
 extern uint8_t calibrated_image[aligned_calibrated_size];
 extern uint8_t calibrated_binary_image[aligned_calibrated_size];
+
+extern LineTrackingGraph vision_line_tracking_graph;
+extern uint8_t vision_ttl_map[aligned_calibrated_size];
+extern uint8_t vision_depth_map[aligned_calibrated_size];
+extern uint8_t vision_visited[aligned_calibrated_size];
+extern int16_t vision_point_to_node_map[aligned_calibrated_size];
 
 struct VisionConfigShared
 {
@@ -25,24 +28,14 @@ struct VisionOutputsShared
     float target_speed;               // 目标速度
     float target_speed_accel;        // 目标速度加速度
 
-    LineTrackingGraph graph;          // 循迹图
+    TrackPath track_path;
 };
 
 // 除图像外只读调试数据
 struct VisionDebugShared
 {
-    // Point2s left_bounds[calibrated_height];
-    // Point2s right_bounds[calibrated_height];
-    // Point2s bottom_bounds[calibrated_height];
-    // float left_has_line;
-    // float right_has_line;
-    // float up_has_line;
+
     float no_element_confidence;
-    // float left_turn_confidence;
-    // float right_turn_confidence;
-    // float cross_road_confidence;
-    // float left_roundabout_confidence;
-    // float right_roundabout_confidence;
 };
 
 extern VisionConfigShared vision_config_shared;
