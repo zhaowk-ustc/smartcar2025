@@ -1,5 +1,3 @@
-#define ENABLE_DEBUG 1
-
 #include "application/car/car.h"
 #include "motion_config.h"
 

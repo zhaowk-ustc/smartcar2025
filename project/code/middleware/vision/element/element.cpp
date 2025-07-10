@@ -65,8 +65,12 @@ pair<ElementType, int> detect_branch_element(const Point2f& in_vec, const vector
             {
                 type = ElementType::CROSS;
             }
+            out_idx = out_dir_indices[1];
+            break;
+        case 2:
+            type = ElementType::UNCERTAIN;
             {
-                float min_cos = std::numeric_limits<float>::max();
+                float min_cos = 2;
                 int min_idx = 0;
                 for (int i = 0; i < out_dirs.size(); ++i)
                 {
@@ -77,11 +81,8 @@ pair<ElementType, int> detect_branch_element(const Point2f& in_vec, const vector
                         min_idx = i;
                     }
                 }
-                out_idx = out_dir_indices[min_idx];
+                out_idx = min_idx;
             }
-            break;
-        case 2:
-            type = ElementType::UNCERTAIN;
             break;
         default:
             break;

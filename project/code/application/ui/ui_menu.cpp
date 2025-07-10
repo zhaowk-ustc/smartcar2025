@@ -109,7 +109,7 @@ void UI::display_camera()
             height = calibrated_height;
             SCB_InvalidateDCache_by_Addr((void*)frame_buffer, width * height);
             // 直接显示原始大小
-            ips114_show_gray_image(camera_display_x_, 0, frame_buffer, width, height, width , height , 0);
+            ips114_show_gray_image(camera_display_x_, 0, frame_buffer, width, height, width, height, 0);
             break;
         case CameraDisplayMode::CALIBRATED_BINARIZED:
             frame_buffer = calibrated_binary_image;
@@ -117,7 +117,7 @@ void UI::display_camera()
             height = calibrated_height;
             SCB_InvalidateDCache_by_Addr((void*)frame_buffer, width * height);
             // 直接显示原始大小
-            ips114_show_gray_image(camera_display_x_, 0, frame_buffer, width, height, width , height , 0);
+            ips114_show_gray_image(camera_display_x_, 0, frame_buffer, width, height, width, height, 0);
             break;
         default:
             break;
@@ -128,7 +128,7 @@ void UI::display_overlay()
 {
     SCB_InvalidateDCache_by_Addr((void*)&vision_debug_shared, sizeof(vision_debug_shared));
     SCB_InvalidateDCache_by_Addr((void*)&vision_outputs_shared, sizeof(vision_outputs_shared));
-
+    SCB_InvalidateDCache_by_Addr((void*)&vision_line_tracking_graph, sizeof(vision_line_tracking_graph));
     static LineTrackingGraph ui_display_graph;
     memcpy(&ui_display_graph, &vision_line_tracking_graph, sizeof(vision_line_tracking_graph));
     draw_graph_overlay(ui_display_graph);
@@ -159,8 +159,8 @@ void UI::draw_graph_nodes(const LineTrackingGraph& graph)
         Point pt = node.data();
 
         // 图像坐标缩放
-        uint16 screen_x = camera_display_x_ + pt.x ;
-        uint16 screen_y = pt.y ;
+        uint16 screen_x = camera_display_x_ + pt.x;
+        uint16 screen_y = pt.y;
 
         // 根据节点类型选择不同的绘制方式
         switch (node.type())
@@ -195,8 +195,8 @@ void UI::draw_graph_edges(const LineTrackingGraph& graph)
             continue; // 跳过已删除的节点
 
         // 图像坐标缩放
-        uint16 screen_x = camera_display_x_ + pt.x ;
-        uint16 screen_y = pt.y ;
+        uint16 screen_x = camera_display_x_ + pt.x;
+        uint16 screen_y = pt.y;
 
         // 绘制到后继节点的连线
         vector<int16_t> successors = node.successors();
@@ -207,8 +207,8 @@ void UI::draw_graph_edges(const LineTrackingGraph& graph)
                 const GraphNode& succ_node = graph.getNode(succ_idx);
                 Point succ_pt = succ_node.data();
 
-                uint16 succ_screen_x = camera_display_x_ + succ_pt.x ;
-                uint16 succ_screen_y = succ_pt.y ;
+                uint16 succ_screen_x = camera_display_x_ + succ_pt.x;
+                uint16 succ_screen_y = succ_pt.y;
 
                 // 绘制连线
                 ips114_draw_line(screen_x, screen_y, succ_screen_x, succ_screen_y, RGB565_YELLOW);
@@ -224,8 +224,8 @@ void UI::draw_graph_root(const LineTrackingGraph& graph)
     {
         const GraphNode& root_node = graph.getNode(graph.root());
         Point root_pt = root_node.data();
-        uint16 root_screen_x = camera_display_x_ + root_pt.x ;
-        uint16 root_screen_y = root_pt.y ;
+        uint16 root_screen_x = camera_display_x_ + root_pt.x;
+        uint16 root_screen_y = root_pt.y;
 
         // 在根节点周围绘制一个大方框
         draw_square(root_screen_x, root_screen_y, 6, RGB565_BLUE);
@@ -270,20 +270,20 @@ void UI::display_graph_stats(const LineTrackingGraph& graph)
 
     // 显示总节点数
     snprintf(stats_buffer, sizeof(stats_buffer), "Nodes: %d", (int)graph.size());
-    screen_show_string(camera_display_x_, calibrated_height , stats_buffer, 10);
+    screen_show_string(camera_display_x_, calibrated_height, stats_buffer, 10);
 
     // 显示各类型节点数量
     snprintf(stats_buffer, sizeof(stats_buffer), "Normal: %d", normal_count);
-    screen_show_string(camera_display_x_, calibrated_height  + 16, stats_buffer, 10);
+    screen_show_string(camera_display_x_, calibrated_height + 16, stats_buffer, 10);
 
     snprintf(stats_buffer, sizeof(stats_buffer), "Branch: %d", branch_count);
-    screen_show_string(camera_display_x_, calibrated_height  + 32, stats_buffer, 10);
+    screen_show_string(camera_display_x_, calibrated_height + 32, stats_buffer, 10);
 
     snprintf(stats_buffer, sizeof(stats_buffer), "End: %d", endpoint_count);
-    screen_show_string(camera_display_x_, calibrated_height  + 48, stats_buffer, 10);
+    screen_show_string(camera_display_x_, calibrated_height + 48, stats_buffer, 10);
 
     snprintf(stats_buffer, sizeof(stats_buffer), "Start: %d", start_count);
-    screen_show_string(camera_display_x_, calibrated_height  + 64, stats_buffer, 10);
+    screen_show_string(camera_display_x_, calibrated_height + 64, stats_buffer, 10);
 
     // 显示根节点(START)坐标信息
     if (graph.root() >= 0 && graph.root() < graph.size())
@@ -300,7 +300,7 @@ void UI::display_graph_stats(const LineTrackingGraph& graph)
 // 绘制方块的辅助函数
 void UI::draw_square(uint16 center_x, uint16 center_y, uint8 size, uint16 color)
 {
-    int half_size = size ;
+    int half_size = size;
 
     // 绘制方块的四条边
     for (int i = -half_size; i <= half_size; ++i)
@@ -322,4 +322,96 @@ void UI::draw_square(uint16 center_x, uint16 center_y, uint8 size, uint16 color)
             ips114_draw_point(center_x + half_size, center_y + i, color);
         }
     }
+}
+
+// 绘制轨迹路径（TrackPath）叠加层
+void UI::draw_path_overlay(const TrackPath& path)
+{
+    // 绘制节点和连接线
+    uint16_t color_normal = RGB565_YELLOW;      // 绿色
+    uint16_t color_roundabout = RGB565_RED;    // 蓝色
+    uint16_t color_cross = RGB565_CYAN;       // 黄色
+    uint16_t color_uncertain = RGB565_GRAY;     // 灰色
+    uint16_t color_start = RGB565_BLUE;
+
+    for (auto i = 0;i < path.size();i++)
+    {
+        const auto& node = path.nodes[i];
+        auto node_pt = node.pos;
+        uint16_t screen_x = camera_display_x_ + static_cast<int>(node_pt.x);
+        uint16_t screen_y = static_cast<int>(node_pt.y);
+        uint16_t color = color_normal; // 默认颜色为白色
+        uint16_t node_radius = 3; // 节点半径
+        switch (node.element)
+        {
+            case ElementType::NORMAL:
+                color = color_normal;
+                node_radius = 3;
+                break;
+            case ElementType::ROUNDABOUT:
+                color = color_roundabout;
+                node_radius = 6;
+                break;
+            case ElementType::CROSS:
+                color = color_cross;
+                node_radius = 6;
+                break;
+            case ElementType::UNCERTAIN:
+                color = color_uncertain;
+                node_radius = 4;
+                break;
+            default:
+                break;
+        }
+        if (i == 0) // 如果是起点
+        {
+            color = color_start; // 起点颜色为蓝色
+            node_radius = 5; // 起点半径稍大
+        }
+        draw_square(screen_x, screen_y, node_radius, color);
+        // 画出next_vec方向
+        if (node.next_vec.x != 0 || node.next_vec.y != 0)
+        {
+            uint16_t next_x = screen_x + static_cast<int>(node.next_vec.x);
+            uint16_t next_y = screen_y + static_cast<int>(node.next_vec.y);
+            ips114_draw_line(screen_x, screen_y, next_x, next_y, color);
+        }
+    }
+
+    // 显示统计信息
+    auto first_element = ElementType::NORMAL;
+    Point2f first_pos = { 0, 0 };
+    for (size_t i = 0; i < path.size(); ++i)
+    {
+        const auto& node = path.nodes[i];
+        if (node.element != ElementType::NORMAL)
+        {
+            first_element = node.element;
+            first_pos = node.pos;
+            break;
+        }
+    }
+    screen_show_string(camera_display_x_, calibrated_height, "Element:", 10);
+    switch (first_element)
+    {
+        case ElementType::NORMAL:
+            screen_show_string(camera_display_x_, calibrated_height + 16, "Normal", 10);
+            break;
+        case ElementType::ROUNDABOUT:
+            screen_show_string(camera_display_x_, calibrated_height + 16, "Roundabout", 10);
+            break;
+        case ElementType::CROSS:
+            screen_show_string(camera_display_x_, calibrated_height + 16, "Cross", 10);
+            break;
+        case ElementType::UNCERTAIN:
+            screen_show_string(camera_display_x_, calibrated_height + 16, "Uncertain", 10);
+            break;
+        default:
+            screen_show_string(camera_display_x_, calibrated_height + 16, "Unknown", 10);
+            break;
+    }
+    screen_show_string(camera_display_x_, calibrated_height + 32, "Pos:", 10);
+    char pos_buffer[32];
+    snprintf(pos_buffer, sizeof(pos_buffer), "(%.1f, %.1f)", first_pos.x, first_pos.y);
+    screen_show_string(camera_display_x_, calibrated_height + 48, pos_buffer, 10);
 }

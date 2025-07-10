@@ -17,7 +17,7 @@ class TrackPath
 public:
 
     TrackPath() : node_count(0) {}
-        static constexpr size_t MAX_NODES = 64;
+    static constexpr size_t MAX_NODES = 64;
     TrackPathNode nodes[MAX_NODES];
     void clear() { node_count = 0; }
     size_t size() const { return node_count; }

@@ -244,17 +244,21 @@ void LineTrackingGraph::merge_nearby_branches()
                         // 新节点的前驱为start_idx的前驱
                         int new_node_idx = addNode(new_point, start_pred, NodeType::NORMAL);
 
-                        // 新节点的后继为start_idx和end_idx的所有后继（去重，且不包含已删除节点）
+                        // 新节点的后继为start_idx和end_idx的所有后继
                         auto start_successors = nodes[start_idx].successors();
                         auto end_successors = nodes[end_idx].successors();
-                        for (int s : start_successors) {
-                            if (s != end_idx && nodes[s].predecessor() != -2) {
+                        for (int s : start_successors)
+                        {
+                            if (s != end_idx && nodes[s].predecessor() != -2)
+                            {
                                 nodes[new_node_idx].add_successor(s);
                                 nodes[s].set_predecessor(new_node_idx);
                             }
                         }
-                        for (int s : end_successors) {
-                            if (s != start_idx && nodes[s].predecessor() != -2) {
+                        for (int s : end_successors)
+                        {
+                            if (s != start_idx && nodes[s].predecessor() != -2)
+                            {
                                 nodes[new_node_idx].add_successor(s);
                                 nodes[s].set_predecessor(new_node_idx);
                             }
@@ -319,57 +323,6 @@ void LineTrackingGraph::delete_short_branch()
     }
 }
 
-// 辅助函数：计算从给定节点开始的分支长度（曼哈顿距离之和）
-int LineTrackingGraph::calculateBranchLength(int start_idx)
-{
-    if (start_idx < 0 || start_idx >= node_count) return 0;
-
-    int total_manhattan_length = 0;
-    int current_idx = start_idx;
-    int prev_idx = -1;
-
-    // 找到起始节点的前驱，作为第一个参考点
-    auto& start_node = nodes[start_idx];
-    if (start_node.predecessor() >= 0 && start_node.predecessor() < node_count)
-    {
-        prev_idx = start_node.predecessor();
-    }
-
-    while (current_idx >= 0 && current_idx < node_count)
-    {
-        auto& node = nodes[current_idx];
-        if (node.predecessor() == -2) break; // 已删除的节点
-
-        // 如果有前一个节点，计算当前段的曼哈顿距离
-        if (prev_idx >= 0 && prev_idx < node_count && nodes[prev_idx].predecessor() != -2)
-        {
-            Point prev_point = nodes[prev_idx].data();
-            Point current_point = nodes[current_idx].data();
-            total_manhattan_length += manhattanDist(prev_point, current_point);
-        }
-
-        auto successors = node.successors();
-
-        if (successors.size() == 0)
-        {
-            // 到达终点
-            break;
-        }
-        else if (successors.size() == 1)
-        {
-            // 继续沿着单一路径
-            prev_idx = current_idx;
-            current_idx = successors[0];
-        }
-        else
-        {
-            // 遇到另一个分支点，停止计算
-            break;
-        }
-    }
-
-    return total_manhattan_length;
-}
 
 // 辅助函数：从终点开始回溯计算分支长度（曼哈顿距离之和）
 int LineTrackingGraph::calculateBranchLengthFromTerminal(int terminal_idx)
@@ -434,12 +387,12 @@ void LineTrackingGraph::deletePathFromTerminal(int terminal_idx)
         // 如果有前驱节点
         if (pred_idx >= 0 && pred_idx < node_count && nodes[pred_idx].predecessor() != -2)
         {
+            auto pred_successors_count = nodes[pred_idx].successors().size();
             // 从前驱节点的后继列表中移除当前节点
             nodes[pred_idx].remove_successor(current_idx);
 
             // 检查前驱节点是否是分支点或START点
-            auto pred_successors = nodes[pred_idx].successors();
-            if (pred_successors.size() > 1 || pred_idx == start_index)
+            if (pred_successors_count > 1 || pred_idx == start_index)
             {
                 // 到达分支点或START点，停止删除
                 break;

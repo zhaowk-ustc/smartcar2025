@@ -16,6 +16,7 @@ void create_line_tracking_graph(
     int image_w,
     int image_h,
     int search_seed_radius,
+    int min_region_size,
     int dist_threshold,
     float rdp_threshold,
     int branch_merge_threshold,
@@ -47,6 +48,7 @@ void create_line_tracking_graph(
     auto seed_link_points = search_seed_points(image, image_w, image_h,
         seed_point,
         search_seed_radius,
+        min_region_size,
         ttl_map,
         visited);
 
@@ -150,6 +152,7 @@ vector<pair<Point, Point>> search_seed_points(
     int image_h,
     Point seed_point,
     const uint8_t ttl,
+    const uint16_t min_region_size,
     uint8_t* ttl_map,
     uint8_t* visited
 )
@@ -192,74 +195,86 @@ vector<pair<Point, Point>> search_seed_points(
 
             int nidx = ny * image_w + nx;
 
-            if (image[nidx] != 0)
+            if (image[nidx] != 0 && ttl_map[nidx] == 0)
             {
-                // 遇到白色像素
-                if (ttl_map[nidx] == 0)
+                // 遇到未遍历过的白色像素
+                Point new_seed(nx, ny);
+
+                memset(visited, 0, image_w * image_h);
+
+                auto new_region = flood_fill(image, visited, image_w, image_h, new_seed, 1);
+
+                if (new_region.size() < min_region_size)
                 {
-                    // 发现新的连通域
-                    Point new_seed(nx, ny);
+                    // 如果新连通域小于最小区域大小，忽略这个区域的点
+                    flood_fill(image, ttl_map, image_w, image_h, new_seed, 1);
+                    continue;
+                }
 
-                    memset(visited, 0, image_w * image_h);
-
-                    vector<Point> current_layer;
-                    vector<Point> next_layer;
-                    current_layer.push_back(new_seed);
-                    bool found = false;
-                    vector<Point> manhattan_nearest;
-                    // 从当前点开始，沿着ttl梯度上升方向回溯
-                    while (!found)
+                vector<Point> current_layer;
+                vector<Point> next_layer;
+                current_layer.push_back(new_seed);
+                bool found = false;
+                vector<Point> manhattan_nearest;
+                // 从当前点开始，沿着ttl梯度上升方向回溯
+                memset(visited, 0, image_w * image_h);
+                while (!found)
+                {
+                    // 检查当前点周围8邻域，找到ttl值更高的点
+                    for (auto pt : current_layer)
                     {
-                        // 检查当前点周围8邻域，找到ttl值更高的点
-                        for (auto pt : current_layer)
+                        for (int dd = 0; dd < 8; ++dd)
                         {
-                            for (int dd = 0; dd < 8; ++dd)
-                            {
-                                int tx = pt.x + dx[dd];
-                                int ty = pt.y + dy[dd];
+                            int tx = pt.x + dx[dd];
+                            int ty = pt.y + dy[dd];
 
-                                if (inBounds(tx, ty, image_w, image_h)
-                                    && visited[ty * image_w + tx] == 0
-                                    )
+                            if (inBounds(tx, ty, image_w, image_h)
+                                && visited[ty * image_w + tx] == 0
+                                )
+                            {
+                                if (ttl_map[ty * image_w + tx] == ttl)
                                 {
-                                    if (ttl_map[ty * image_w + tx] == ttl)
-                                    {
-                                        found = true;
-                                        manhattan_nearest.push_back(Point(tx, ty));
-                                    }
-                                    visited[ty * image_w + tx] = 1;
-                                    next_layer.push_back(Point(tx, ty));
+                                    found = true;
+                                    manhattan_nearest.push_back(Point(tx, ty));
                                 }
+                                visited[ty * image_w + tx] = 1;
+                                next_layer.push_back(Point(tx, ty));
                             }
                         }
-                        current_layer = next_layer;
-                        next_layer.clear();
                     }
-                    // 提取出当前层欧氏距离最近的点
-                    Point euclidean_nearest;
-                    float nearest_dist = float(image_w + image_h); // 初始化为最大距离
-                    for (auto pt : manhattan_nearest)
+                    current_layer = next_layer;
+                    next_layer.clear();
+                }
+                // 提取出当前层欧氏距离最近的点
+                Point euclidean_nearest;
+                float nearest_dist = float(image_w + image_h); // 初始化为最大距离
+                for (auto pt : manhattan_nearest)
+                {
+                    float dist = euclideanDist(new_seed, pt);
+                    if (dist < nearest_dist)
                     {
-                        float dist = euclideanDist(new_seed, pt);
-                        if (dist < nearest_dist)
-                        {
-                            nearest_dist = dist;
-                            euclidean_nearest = pt;
-                        }
-                    }
-
-                    // 将新的seed-link对加入结果
-                    seed_link_points.push_back({ new_seed, euclidean_nearest });
-
-                    // 对新连通域进行flood fill
-                    auto new_region = flood_fill(image, ttl_map, image_w, image_h, new_seed, ttl);
-
-                    // 将新连通域的点加入BFS队列
-                    for (const auto& pt : new_region)
-                    {
-                        bfs_queue.push(pt);
+                        nearest_dist = dist;
+                        euclidean_nearest = pt;
                     }
                 }
+
+                // 将新的seed-link对加入结果
+                seed_link_points.push_back({ new_seed, euclidean_nearest });
+
+                // 对新连通域进行flood fill
+                for(auto pt:new_region)
+                {
+                    ttl_map[pt.y * image_w + pt.x] = ttl; // 更新ttl值
+                }
+                // new_region.clear();
+                // new_region = flood_fill(image, ttl_map, image_w, image_h, new_seed, ttl);
+
+                // 将新连通域的点加入BFS队列
+                for (const auto& pt : new_region)
+                {
+                    bfs_queue.push(pt);
+                }
+
             }
             else
             {
@@ -342,8 +357,8 @@ static void build_region_graph(
             for (const auto& neighbor : neighbors)
             {
                 // 如果是当前层未处理过的节点
-                if (point_to_node_map[neighbor.y * image_w + neighbor.x] == -1 &&
-                    inBounds(neighbor.x, neighbor.y, image_w, image_h) &&
+                if (inBounds(neighbor.x, neighbor.y, image_w, image_h) &&
+                    point_to_node_map[neighbor.y * image_w + neighbor.x] == -1 &&
                     image[neighbor.y * image_w + neighbor.x] != 0) // 确保是白色像素
                 {
                     current_layer.push_back(neighbor);

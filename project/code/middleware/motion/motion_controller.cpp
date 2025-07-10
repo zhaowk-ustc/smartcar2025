@@ -98,12 +98,12 @@ void MotionController::connect_inputs(
 
 void MotionController::setup_debug_vars()
 {
-    // speed_pid_.export_debug_vars(this, "pid_s.");
-    // direction_pid_.export_debug_vars(this, "pid_d.");
-    // add_debug_var("lenc", make_readonly_var("lenc", &left_encoder_count_));
-    // add_debug_var("renc", make_readonly_var("renc", &right_encoder_count_));
-    // add_debug_var("spd", make_readonly_var("spd", &current_speed_));
-    // add_debug_var("lpwm", make_readonly_var("lpwm", &left_motor_duty_));
-    // add_debug_var("rpwm", make_readonly_var("rpwm", &right_motor_duty_));
-    // add_debug_var("servopwm", make_debug_var("servopwm", &servo_dir_));
+    speed_pid_.export_debug_vars(this, "pid_s.");
+    direction_pid_.export_debug_vars(this, "pid_d.");
+    add_debug_var("lenc", make_readonly_var("lenc", &left_encoder_count_));
+    add_debug_var("renc", make_readonly_var("renc", &right_encoder_count_));
+    add_debug_var("spd", make_readonly_var("spd", &current_speed_));
+    add_debug_var("lpwm", make_readonly_var("lpwm", &left_motor_duty_));
+    add_debug_var("rpwm", make_readonly_var("rpwm", &right_motor_duty_));
+    add_debug_var("servodir", make_debug_var("servodir", &servo_dir_));
 }

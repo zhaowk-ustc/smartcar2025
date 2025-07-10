@@ -4,6 +4,7 @@
 #include "zf_common_headfile.h"
 #include "../debugger/debugger.h"
 #include "middleware/vision/track/line_tracking_graph.h"
+#include "middleware/vision/element/track_path.h"
 #include <vector>
 #include <string>
 #include <cmath>
@@ -87,6 +88,7 @@ private:
     void draw_graph_root(const LineTrackingGraph& graph);
     void display_graph_stats(const LineTrackingGraph& graph);
     void draw_square(uint16 center_x, uint16 center_y, uint8 size, uint16 color);
+    void draw_path_overlay(const TrackPath& path);
 
     bool enabled_ = true; // UI是否启用
 };

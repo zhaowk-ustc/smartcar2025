@@ -145,11 +145,6 @@ public:
     // void simplify();
     void simplify(float rdp_collinearity_threshold, int branch_merge_threshold, int min_branch_length);
     
-    // 设置简化参数
-    void setRdpCollinearityThreshold(int threshold) { rdp_collinearity_threshold_ = threshold; }
-    void setBranchMergeThreshold(int threshold) { branch_merge_threshold_ = threshold; }
-    void setMinBranchLength(int length) { min_branch_length_ = length; }
-
 private:
     static constexpr size_t MAX_NODES = 512;
     GraphNode nodes[MAX_NODES];
@@ -166,7 +161,6 @@ private:
     void delete_short_branch();
     
     // 辅助函数
-    int calculateBranchLength(int start_idx);
     int calculateBranchLengthFromTerminal(int terminal_idx);
     void deletePathFromTerminal(int terminal_idx);
     void simplifySegment(vector<int> segment);
