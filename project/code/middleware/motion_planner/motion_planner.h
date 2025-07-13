@@ -37,7 +37,7 @@ private:
     static float angle_to_servo(float angle)
     {
         // 把角度映射到(-1, 1)范围内
-        return -angle / 3;
+        return -angle;
     }
 
     // float get_lookahead_distance(float speed) const

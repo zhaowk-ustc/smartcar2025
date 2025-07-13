@@ -16,7 +16,7 @@ constexpr PID::Params speed_pid_params = {
 };
 
 constexpr PID::Params direction_pid_params = {
-    .kp = 3.0f,
+    .kp = 1.0f,
     .ki = 0.0f,
     .kd = 0.00f,
     .kd2 = 0.0f
