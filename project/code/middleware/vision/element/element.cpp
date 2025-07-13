@@ -4,7 +4,6 @@
 #include <cmath>
 #include <algorithm>
 #include <utility>
-#include <complex>
 #include <numeric>
 
 
@@ -24,13 +23,13 @@ pair<ElementType, int> detect_branch_element(const Point2f& in_vec, const vector
     float cos_sum = 0.0f;
     float sin_sum = 0.0f;
 
-    complex<float> in_complex(in_vec.x, in_vec.y);
-    in_complex /= abs(in_complex);
+    complex<float> in_complex(in_vec.x(), in_vec.y());
+    // in_complex /= abs(in_complex);
     in_complex *= -1.0f; // 反向入射向量
     for (const auto& dir : out_vecs)
     {
-        complex<float> out_complex(dir.x, dir.y);
-        out_complex /= abs(out_complex);
+        complex<float> out_complex(dir.x(), dir.y());
+        // out_complex /= abs(out_complex);
         out_complex /= in_complex;
         float cos = out_complex.real();
         float sin = out_complex.imag();
@@ -57,7 +56,7 @@ pair<ElementType, int> detect_branch_element(const Point2f& in_vec, const vector
     switch (out_vecs.size())
     {
         case 3:
-            if (abs(sin_sum) >= 0.5)
+            if (abs(sin_sum) >= 0.4)
             {
                 type = ElementType::ROUNDABOUT;
             }

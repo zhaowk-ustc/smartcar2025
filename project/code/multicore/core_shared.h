@@ -34,8 +34,7 @@ struct VisionOutputsShared
 // 除图像外只读调试数据
 struct VisionDebugShared
 {
-
-    float no_element_confidence;
+ Point2f pure_pursuit_target;
 };
 
 extern VisionConfigShared vision_config_shared;

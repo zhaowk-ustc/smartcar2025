@@ -20,6 +20,7 @@ void UI::update_mainloop()
 
     handle_current_key();
     display_menu();
+    display_camera();
 }
 
 void UI::update_pit()

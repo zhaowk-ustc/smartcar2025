@@ -63,22 +63,21 @@ Point find_white_point(const uint8_t* image, uint16_t width, uint16_t height,
             Point& current_pos = current_positions[i];
 
             // 检查当前点是否在图像范围内
-            if (current_pos.x < 0 || current_pos.x >= width ||
-                current_pos.y < 0 || current_pos.y >= height)
+            if (current_pos.x() < 0 || current_pos.x() >= width ||
+                current_pos.y() < 0 || current_pos.y() >= height)
             {
                 valid_positions[i] = false;  // 标记为无效
                 continue;
             }
 
             // 检查当前点是否为白点（二值化图像：255为白点，0为黑点）
-            if (image[current_pos.y * width + current_pos.x] == 255)
+            if (image[current_pos.y() * width + current_pos.x()] == 255)
             {
-                return Point(current_pos.x, current_pos.y);  // 找到白点，立即返回
+                return Point(current_pos);  // 找到白点，立即返回
             }
 
             // 移动到下一个位置
-            current_pos.x += dx;
-            current_pos.y += dy;
+            current_pos += Point(dx, dy);
         }
 
         // 检查是否还有有效的搜索点

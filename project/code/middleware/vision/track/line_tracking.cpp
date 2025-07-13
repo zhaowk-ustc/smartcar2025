@@ -182,14 +182,14 @@ vector<pair<Point, Point>> search_seed_points(
         Point current = bfs_queue.front();
         bfs_queue.pop();
 
-        int current_ttl = ttl_map[current.y * image_w + current.x];
+        int current_ttl = ttl_map[current.y() * image_w + current.x()];
         if (current_ttl <= 0) continue;
 
         // 8邻域扩展
         for (int d = 0; d < 8; ++d)
         {
-            int nx = current.x + dx[d];
-            int ny = current.y + dy[d];
+            int nx = current.x() + dx[d];
+            int ny = current.y() + dy[d];
 
             if (!inBounds(nx, ny, image_w, image_h)) continue;
 
@@ -225,8 +225,8 @@ vector<pair<Point, Point>> search_seed_points(
                     {
                         for (int dd = 0; dd < 8; ++dd)
                         {
-                            int tx = pt.x + dx[dd];
-                            int ty = pt.y + dy[dd];
+                            int tx = pt.x() + dx[dd];
+                            int ty = pt.y() + dy[dd];
 
                             if (inBounds(tx, ty, image_w, image_h)
                                 && visited[ty * image_w + tx] == 0
@@ -262,12 +262,10 @@ vector<pair<Point, Point>> search_seed_points(
                 seed_link_points.push_back({ new_seed, euclidean_nearest });
 
                 // 对新连通域进行flood fill
-                for(auto pt:new_region)
+                for (auto pt : new_region)
                 {
-                    ttl_map[pt.y * image_w + pt.x] = ttl; // 更新ttl值
+                    ttl_map[pt.y() * image_w + pt.x()] = ttl; // 更新ttl值
                 }
-                // new_region.clear();
-                // new_region = flood_fill(image, ttl_map, image_w, image_h, new_seed, ttl);
 
                 // 将新连通域的点加入BFS队列
                 for (const auto& pt : new_region)
@@ -307,7 +305,7 @@ void get_depth_map(
     for (const auto& seed : seed_points)
     {
         // 如果该点已经被染色，跳过
-        if (depth_map[seed.y * image_w + seed.x] > 0) continue;
+        if (depth_map[seed.y() * image_w + seed.x()] > 0) continue;
 
         // 调用 flood_fill_with_depth 对该连通域进行层次遍历染色
         flood_fill_with_depth(image, depth_map, image_w, image_h, seed);
@@ -335,7 +333,7 @@ static void build_region_graph(
         // 图已满，无法添加更多节点
         return;
     }
-    point_to_node_map[seed.y * image_w + seed.x] = start_node_idx;
+    point_to_node_map[seed.y() * image_w + seed.x()] = start_node_idx;
     prev_layer.push_back(seed);
 
     while (!prev_layer.empty())
@@ -349,7 +347,7 @@ static void build_region_graph(
         for (const auto& pt : prev_layer)
         {
             // 获取当前像素点对应的节点索引
-            int node_idx = point_to_node_map[pt.y * image_w + pt.x];
+            int node_idx = point_to_node_map[pt.y() * image_w + pt.x()];
             if (node_idx == -1) continue;
 
             // 获取当前节点的所有邻居
@@ -357,9 +355,9 @@ static void build_region_graph(
             for (const auto& neighbor : neighbors)
             {
                 // 如果是当前层未处理过的节点
-                if (inBounds(neighbor.x, neighbor.y, image_w, image_h) &&
-                    point_to_node_map[neighbor.y * image_w + neighbor.x] == -1 &&
-                    image[neighbor.y * image_w + neighbor.x] != 0) // 确保是白色像素
+                if (inBounds(neighbor.x(), neighbor.y(), image_w, image_h) &&
+                    point_to_node_map[neighbor.y() * image_w + neighbor.x()] == -1 &&
+                    image[neighbor.y() * image_w + neighbor.x()] != 0) // 确保是白色像素
                 {
                     current_layer.push_back(neighbor);
                     // 如果当前节点索引未设置或像素超出聚类阈值
@@ -367,8 +365,13 @@ static void build_region_graph(
                         manhattanDist(neighbor, current_node_point) > dist_thresh)
                     {
                         current_node_idx = graph.addNode(neighbor);
+                        if (current_node_idx == -1)
+                        {
+                            // 图已满，无法添加更多节点
+                            return;
+                        }
                         current_node_point = neighbor;
-                        point_to_node_map[neighbor.y * image_w + neighbor.x] = current_node_idx;
+                        point_to_node_map[neighbor.y() * image_w + neighbor.x()] = current_node_idx;
                         // 连接节点
                         graph.getNode(node_idx).add_successor(current_node_idx);
                         graph.getNode(current_node_idx).set_predecessor(node_idx);
@@ -376,7 +379,7 @@ static void build_region_graph(
                     else
                     {
                         // 如果当前节点已经存在，直接使用现有节点索引
-                        point_to_node_map[neighbor.y * image_w + neighbor.x] = current_node_idx;
+                        point_to_node_map[neighbor.y() * image_w + neighbor.x()] = current_node_idx;
                     }
                 }
             }
@@ -409,7 +412,7 @@ void build_graph(
     build_region_graph(graph, image, image_w, image_h, main_seed, dist_thresh, point_to_node_map);
 
     // 设置根节点并标记为START类型
-    int root_idx = point_to_node_map[main_seed.y * image_w + main_seed.x];
+    int root_idx = point_to_node_map[main_seed.y() * image_w + main_seed.x()];
     graph.set_root(root_idx);
     if (root_idx >= 0 && root_idx < graph.size())
     {
@@ -424,8 +427,8 @@ void build_graph(
         build_region_graph(graph, image, image_w, image_h, seed, dist_thresh, point_to_node_map);
 
         // 获取当前seed对应的节点索引
-        auto seed_node_idx = point_to_node_map[seed.y * image_w + seed.x];
-        auto link_node_idx = point_to_node_map[link.y * image_w + link.x];
+        auto seed_node_idx = point_to_node_map[seed.y() * image_w + seed.x()];
+        auto link_node_idx = point_to_node_map[link.y() * image_w + link.x()];
         if (seed_node_idx != -1)
         {
             // 连接方向：从link节点连接到seed节点（link是父节点，seed是子节点）

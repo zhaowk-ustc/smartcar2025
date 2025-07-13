@@ -39,12 +39,12 @@ void VisionSystem::update()
     create_line_tracking_graph(
         vision_static_graph,
         calibrated_binary_image, calibrated_width, calibrated_height,
-        10, //search_seed_radius
+        5, //search_seed_radius
         8, //min_region_size
-        8, //dist_threshold
+        4, //dist_threshold
         6, //rdp_threshold
-        12, //branch_merge_threshold
-        6, //min_branch_length
+        20, //branch_merge_threshold
+        10, //min_branch_length
         vision_ttl_map,
         vision_depth_map,
         vision_visited,

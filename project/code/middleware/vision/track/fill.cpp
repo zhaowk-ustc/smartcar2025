@@ -19,16 +19,16 @@ std::vector<Point> flood_fill(
 )
 {
     vector<Point> region;
-    if (!inBounds(start.x, start.y, image_w, image_h) ||
-        image[start.y * image_w + start.x] == 0 ||
-        visited[start.y * image_w + start.x])
+    if (!inBounds(start.x(), start.y(), image_w, image_h) ||
+        image[start.y() * image_w + start.x()] == 0 ||
+        visited[start.y() * image_w + start.x()])
     {
         return region;
     }
 
     queue<Point> flood_queue;
     flood_queue.push(start);
-    visited[start.y * image_w + start.x] = fill_value;
+    visited[start.y() * image_w + start.x()] = fill_value;
     while (!flood_queue.empty())
     {
         Point current = flood_queue.front();
@@ -38,8 +38,8 @@ std::vector<Point> flood_fill(
         // 8邻域扩展
         for (int d = 0; d < 8; ++d)
         {
-            int nx = current.x + dx[d];
-            int ny = current.y + dy[d];
+            int nx = current.x() + dx[d];
+            int ny = current.y() + dy[d];
 
             if (inBounds(nx, ny, image_w, image_h))
             {
@@ -66,16 +66,16 @@ std::vector<Point> flood_fill_with_depth(
 )
 {
     vector<Point> region;
-    if (!inBounds(start.x, start.y, image_w, image_h) ||
-        image[start.y * image_w + start.x] == 0 ||
-        depth_map[start.y * image_w + start.x] > 0)
+    if (!inBounds(start.x(), start.y(), image_w, image_h) ||
+        image[start.y() * image_w + start.x()] == 0 ||
+        depth_map[start.y() * image_w + start.x()] > 0)
     {
         return region;
     }
 
     queue<Point> bfs_queue;
     bfs_queue.push(start);
-    depth_map[start.y * image_w + start.x] = 1; // 起始点深度为1
+    depth_map[start.y() * image_w + start.x()] = 1; // 起始点深度为1
 
     while (!bfs_queue.empty())
     {
@@ -83,13 +83,13 @@ std::vector<Point> flood_fill_with_depth(
         bfs_queue.pop();
         region.push_back(current);
 
-        int current_depth = depth_map[current.y * image_w + current.x];
+        int current_depth = depth_map[current.y() * image_w + current.x()];
 
         // 8邻域扩展
         for (int d = 0; d < 8; ++d)
         {
-            int nx = current.x + dx[d];
-            int ny = current.y + dy[d];
+            int nx = current.x() + dx[d];
+            int ny = current.y() + dy[d];
 
             if (inBounds(nx, ny, image_w, image_h))
             {

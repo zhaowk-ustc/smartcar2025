@@ -236,14 +236,17 @@ void LineTrackingGraph::merge_nearby_branches()
                         // 新建一个节点，数据为start_idx和end_idx的数据平均值
                         Point start_point = nodes[start_idx].data();
                         Point end_point = nodes[end_idx].data();
-                        Point new_point;
-                        new_point.x = (start_point.x + end_point.x) / 2;
-                        new_point.y = (start_point.y + end_point.y) / 2;
+                        Point new_point = Point((start_point.x() + end_point.x()) / 2,
+                            (start_point.y() + end_point.y()) / 2);
 
                         int start_pred = nodes[start_idx].predecessor();
                         // 新节点的前驱为start_idx的前驱
                         int new_node_idx = addNode(new_point, start_pred, NodeType::NORMAL);
-
+                        if (new_node_idx == -1)
+                        {
+                            // 图已满，无法添加更多节点
+                            return;
+                        }
                         // 新节点的后继为start_idx和end_idx的所有后继
                         auto start_successors = nodes[start_idx].successors();
                         auto end_successors = nodes[end_idx].successors();

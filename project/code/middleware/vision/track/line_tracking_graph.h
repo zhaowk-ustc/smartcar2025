@@ -38,7 +38,7 @@ public:
                 return; // 已经存在，不需要重复添加
             }
         }
-        
+
         // 添加到第一个空位
         for (int i = 0; i < 3; ++i)
         {
@@ -88,7 +88,7 @@ public:
     Point data() const { return data_; }
 
     NodeType type() const { return type_; }
-    
+
     void set_type(NodeType new_type) { type_ = new_type; }
 
 private:
@@ -144,9 +144,9 @@ public:
 
     // void simplify();
     void simplify(float rdp_collinearity_threshold, int branch_merge_threshold, int min_branch_length);
-    
+
 private:
-    static constexpr size_t MAX_NODES = 512;
+    static constexpr size_t MAX_NODES = 256;
     GraphNode nodes[MAX_NODES];
     size_t node_count = 0;      // 当前节点数量
     int start_index = 0;    // 起始节点的索引
@@ -159,7 +159,7 @@ private:
     void rdp_simplify();
     void merge_nearby_branches();
     void delete_short_branch();
-    
+
     // 辅助函数
     int calculateBranchLengthFromTerminal(int terminal_idx);
     void deletePathFromTerminal(int terminal_idx);

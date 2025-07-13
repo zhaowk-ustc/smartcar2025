@@ -1153,6 +1153,9 @@
                     <name>$PROJ_DIR$\..\..\code\application\ui\ui.h</name>
                 </file>
                 <file>
+                    <name>$PROJ_DIR$\..\..\code\application\ui\ui_camera.cpp</name>
+                </file>
+                <file>
                     <name>$PROJ_DIR$\..\..\code\application\ui\ui_keymap.cpp</name>
                 </file>
                 <file>
@@ -1211,6 +1214,15 @@
                 </file>
                 <file>
                     <name>$PROJ_DIR$\..\..\code\middleware\motion\pid.h</name>
+                </file>
+            </group>
+            <group>
+                <name>motion_planner</name>
+                <file>
+                    <name>$PROJ_DIR$\..\..\code\middleware\motion_planner\motion_planner.cpp</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\code\middleware\motion_planner\motion_planner.h</name>
                 </file>
             </group>
             <group>

@@ -3,7 +3,8 @@
 #include <cmath>
 
 Car::Car(const Car::Config& config)
-    : motion_controller(config.motion_config)
+    : motion_controller(config.motion_controller_config)
+    , motion_planner(config.motion_planner_config)
 {
     motion_controller.connect_inputs(
         &target_speed,
@@ -11,6 +12,12 @@ Car::Car(const Car::Config& config)
         &target_direction,
         &target_direction_accel);
 
+    motion_planner.connect_inputs(&car_path);
+    motion_planner.connect_outputs(
+        &target_speed,
+        &target_speed_accel,
+        &target_direction,
+        &target_direction_accel);
     setup_debug_vars();
 }
 
@@ -37,7 +44,8 @@ void Car::update_mainloop()
         ui_flag_ = false;
     }
     update_multicore();
-    system_delay_ms(1);
+
+    motion_planner.update();
 }
 
 void Car::update_pit5ms()
@@ -47,6 +55,7 @@ void Car::update_pit5ms()
 
 void Car::update_pit10ms()
 {
+
     motion_controller.update();
 }
 
@@ -59,8 +68,8 @@ void Car::update_pit20ms()
 
 void Car::setup_debug_vars()
 {
-    // motion_controller.export_debug_vars(&debugger, "");
-    // ui.export_debug_vars(&debugger, "");
+    motion_controller.export_debug_vars(&debugger, "");
+    ui.export_debug_vars(&debugger, "");
 
     // 添加调试变量
     add_debug_var("target_speed", make_debug_var("target_speed", &target_speed));
@@ -79,7 +88,8 @@ void Car::setup_debug_vars()
 void Car::update_multicore()
 {
     SCB_InvalidateDCache_by_Addr((void*)&vision_outputs_shared, sizeof(vision_outputs_shared));
-
+    SCB_InvalidateDCache_by_Addr((void*)&vision_outputs_shared, sizeof(vision_outputs_shared));
+    memcpy(&car_path, &vision_outputs_shared.track_path, sizeof(TrackPath));
     target_direction = vision_outputs_shared.bias;
 
 }

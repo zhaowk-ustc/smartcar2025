@@ -3,6 +3,7 @@
 
 #include "zf_common_headfile.h"
 #include "middleware/motion/motion_controller.h"
+#include "middleware/motion_planner/motion_planner.h"
 // #include "middleware/vision/vision_system.h"
 #include "application/debugger/debugger.h"
 #include "application/ui/ui.h"
@@ -14,7 +15,8 @@ class Car : public IDebuggable
 public:
     struct Config
     {
-        MotionController::Config motion_config;
+        MotionController::Config motion_controller_config;
+        MotionPlanner::Config motion_planner_config;
     };
 
     Car(const Config& config);
@@ -33,6 +35,8 @@ private:
     // 核心组件
     // VisionSystem vision_system;  // 视觉系统
     MotionController motion_controller;  // 运动控制
+    MotionPlanner motion_planner;  // 运动规划
+    TrackPath car_path;  // 视觉路径
     Debugger debugger;
     UI ui;
 

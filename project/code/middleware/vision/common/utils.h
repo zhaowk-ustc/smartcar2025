@@ -45,30 +45,28 @@ inline bool inBounds(int x, int y, int w, int h)
 // 计算两点欧氏距离
 inline float euclideanDist(const Point& a, const Point& b)
 {
-    return std::sqrtf(static_cast<float>(a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y));
+    return std::sqrtf(static_cast<float>(a.x() - b.x()) * (a.x() - b.x()) + (a.y() - b.y()) * (a.y() - b.y()));
 }
 
 // 计算两点曼哈顿距离（直角距离）
 inline int manhattanDist(const Point& a, const Point& b)
 {
-    return std::abs(a.x - b.x) + std::abs(a.y - b.y);
+    return std::abs(a.x() - b.x()) + std::abs(a.y() - b.y());
 }
 
 // 计算点到直线的垂直距离（欧氏距离）
 inline float pointToLineDistance(const Point& point, const Point& lineStart, const Point& lineEnd)
 {
     // 如果直线起点和终点相同，返回点到点的距离
-    if (lineStart.x == lineEnd.x && lineStart.y == lineEnd.y)
+    if (lineStart.x() == lineEnd.x() && lineStart.y() == lineEnd.y())
     {
         return euclideanDist(point, lineStart);
     }
-    
     // 使用点到直线距离公式：|ax + by + c| / sqrt(a² + b²)
     // 直线方程：(y2-y1)x - (x2-x1)y + (x2*y1 - x1*y2) = 0
-    float a = lineEnd.y - lineStart.y;
-    float b = lineStart.x - lineEnd.x;
-    float c = lineEnd.x * lineStart.y - lineStart.x * lineEnd.y;
-    
-    float distance = std::abs(a * point.x + b * point.y + c) / std::sqrtf(a * a + b * b);
+    float a = lineEnd.y() - lineStart.y();
+    float b = lineStart.x() - lineEnd.x();
+    float c = lineEnd.x() * lineStart.y() - lineStart.x() * lineEnd.y();
+    float distance = std::abs(a * point.x() + b * point.y() + c) / std::sqrtf(a * a + b * b);
     return distance;
 }
