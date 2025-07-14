@@ -13,7 +13,7 @@ std::vector<Point> flood_fill(
 );
 
 // 从种子点开始对连通域做层次遍历并染色，染色值为层次+1
-std::vector<Point> flood_fill_with_depth(
+std::pair<std::vector<Point>, int> flood_fill_with_depth(
     const uint8_t* image,
     uint8_t* depth_map,
     int image_w,

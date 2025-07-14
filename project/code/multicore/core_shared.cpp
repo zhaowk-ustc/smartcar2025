@@ -21,16 +21,16 @@ VisionConfigShared vision_config_shared = {
 
 };
 
-#pragma location = 0x2804c000
+#pragma location = 0x2804b000
 VisionOutputsShared vision_outputs_shared = {
 
 };
 
-#pragma location = 0x28050000
+#pragma location = 0x2804d000
 VisionDebugShared vision_debug_shared = {
 
 
 };
 
-#pragma location = 0x28058000
+#pragma location = 0x28050000
 LineTrackingGraph vision_line_tracking_graph;

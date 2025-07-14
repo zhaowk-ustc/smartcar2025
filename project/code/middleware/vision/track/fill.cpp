@@ -57,7 +57,7 @@ std::vector<Point> flood_fill(
 
 
 // 从种子点开始对连通域做层次遍历并染色，染色值为层次+1
-std::vector<Point> flood_fill_with_depth(
+std::pair<std::vector<Point>, int> flood_fill_with_depth(
     const uint8_t* image,
     uint8_t* depth_map,
     int image_w,
@@ -70,12 +70,15 @@ std::vector<Point> flood_fill_with_depth(
         image[start.y() * image_w + start.x()] == 0 ||
         depth_map[start.y() * image_w + start.x()] > 0)
     {
-        return region;
+        return  make_pair(region, 0);
     }
 
     queue<Point> bfs_queue;
     bfs_queue.push(start);
     depth_map[start.y() * image_w + start.x()] = 1; // 起始点深度为1
+
+    // 统计前64层的点数
+    int depth_count[64] = { 0 };
 
     while (!bfs_queue.empty())
     {
@@ -84,6 +87,8 @@ std::vector<Point> flood_fill_with_depth(
         region.push_back(current);
 
         int current_depth = depth_map[current.y() * image_w + current.x()];
+        if (current_depth >= 1 && current_depth <= 64)
+            depth_count[current_depth - 1]++;
 
         // 8邻域扩展
         for (int d = 0; d < 8; ++d)
@@ -102,6 +107,13 @@ std::vector<Point> flood_fill_with_depth(
             }
         }
     }
-    return region;
+    // 输出前64层的最大点数
+    int max_layer_count = 0;
+    for (int i = 0; i < 64; ++i)
+    {
+        if (depth_count[i] > max_layer_count) max_layer_count = depth_count[i];
+    }
+
+    return make_pair(region, max_layer_count);
 }
 

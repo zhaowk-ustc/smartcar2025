@@ -2,6 +2,7 @@
 #include "../track/line_tracking_graph.h"
 #include "element.h"
 #include <vector>
+#include <cmath>
 
 // 单个轨迹节点
 struct TrackPathNode
@@ -32,6 +33,21 @@ public:
         return node_count - 1;
     }
     float total_length;
+
+    const Point2f& start() const
+    {
+        if (node_count > 0)
+            return nodes[0].pos;
+        static Point2f empty_point(0,0);
+        return empty_point; // 返回一个空点
+    }
+    const Point2f& end() const
+    {
+        if (node_count > 0)
+            return nodes[node_count - 1].pos;
+        static Point2f empty_point(0,0);
+        return empty_point; // 返回一个空点
+    }
 private:
 
     size_t node_count;

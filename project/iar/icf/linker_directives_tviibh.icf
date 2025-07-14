@@ -75,8 +75,8 @@ define symbol cm0plus_heap_reserve              =  1K;
 define symbol cm0plus_stack_reserve             =  1K;
 define symbol cm7_heap_reserve                  = 64K;
 define symbol cm7_stack_reserve                 = 64K;
-define symbol cm7_itcm_reserve                  = 16K;
-define symbol cm7_dtcm_reserve                  = 16K;
+define symbol cm7_itcm_reserve                  = 32K;
+define symbol cm7_dtcm_reserve                  = 32K;
 
 // Map core dependent definition to generic symbol for block definition
 if(isdefinedsymbol(_CORE_cm0plus_)) 

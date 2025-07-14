@@ -16,14 +16,37 @@ void MotionPlanner::reset()
 
 void MotionPlanner::update()
 {
+    if (!input_path_ || input_path_->size() < 2)
+    {
+        // 如果没有输入路径或路径节点数小于2，直接返回
+        *output_target_speed_ = 0.0f;
+        *output_target_angle_ = 0.0f;
+        return;
+    }
+
+    update_angle();
+    update_speed();
+}
+
+void MotionPlanner::update_angle()
+{
     static TrackPath planner_path;
     memcpy(&planner_path, &vision_outputs_shared.track_path, sizeof(vision_outputs_shared.track_path));
+
+    if (planner_path.size() < 2)
+    {
+        // 如果路径节点数小于2，无法进行规划
+        *output_target_speed_ = 0.0f;
+        *output_target_angle_ = 0.0f;
+        return;
+    }
 
     // 1. 计算主前瞻曲率和3/4前瞻曲率和实际主前瞻距离
     float lookahead = 20.0f;
     Point2f target_point;
-    float angle, curvature2, actual_lookahead;
-    std::tie(target_point, angle, curvature2, actual_lookahead) = pure_pursuit(planner_path, lookahead);
+    float angle, angle2, actual_lookahead;
+    float angle_vel = 0.0f; // 曲率变化率，暂时设为0
+    std::tie(target_point, angle, angle2, actual_lookahead) = pure_pursuit(planner_path, lookahead);
 
     // 2. 计算曲率变化率（曲率对时间的导数，简单差分）
     // static float last_curvature = 0.0f;
@@ -31,22 +54,21 @@ void MotionPlanner::update()
     // float curvature_rate = (curvature - last_curvature) / dt;
     // last_curvature = curvature;
 
-    // 3. 速度设定为 max(某个常数, 某个常数/|曲率|)
-    // constexpr float kMinSpeed = 0.5f; // 最低速度（单位：m/s，可调整）
-    // constexpr float kCurvatureSpeedFactor = 10.0f; // 曲率速度因子（可调整）
-    // float speed = std::max(kMinSpeed, kCurvatureSpeedFactor / (std::abs(curvature) + 1e-3f));
-    float speed = 30;
-    // 4. 加速度（速度对时间的导数，简单差分）
-    // static float last_speed = 0.0f;
-    // float accel = (speed - last_speed) / dt;
-    // last_speed = speed;
-
-    // 5. 保存到成员变量
-    *output_target_speed_ = speed;
-    // target_speed_accel_ = accel;
     vision_debug_shared.pure_pursuit_target = target_point;
+
     *output_target_angle_ = angle_to_servo(angle);
-    // target_curvature_rate_ = curvature_rate;
+    *output_target_angle_vel_ = angle_to_servo(angle_vel);
+}
+
+void MotionPlanner::update_speed()
+{
+    // 速度更新逻辑可以在这里实现
+    // 目前只是简单地将目标速度设置为0.0f
+    float speed = 30;
+    float accel = 0.0f; // 假设加速度为0
+
+    *output_target_speed_ = speed;
+    *output_target_speed_accel_ = accel;
 }
 
 void MotionPlanner::connect_inputs(const TrackPath* path)
@@ -112,4 +134,22 @@ std::tuple<Point2f, float, float, float> MotionPlanner::pure_pursuit(const Track
     float curvature2 = x_r2 / (actual_lookahead2 > 1e-6f ? actual_lookahead2 : 1.0f);
 
     return std::tuple<Point2f, float, float, float>(target, curvature, curvature2, actual_lookahead);
+}
+
+constexpr float U_TURN_THRESHOLD = calibrated_height * 0.2f; // U型转弯的y阈值
+void MotionPlanner::detect_u_turn(const TrackPath& path)
+{
+    if (path.size() < 2)
+    {
+        return;
+    }
+    Point2f start = path.start();
+    Point2f end = path.end();
+
+    // 如果end的y过小，认为发生了U型转弯
+    if (end.y() < U_TURN_THRESHOLD)
+    {
+        is_u_turn = true;
+        u_turn_direction_ = (end.x() > start.x()); // 根据x方向判断U型转弯方向
+    }
 }

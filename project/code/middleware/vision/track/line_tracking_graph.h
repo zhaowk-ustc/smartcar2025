@@ -104,6 +104,7 @@ class LineTrackingGraph
 {
 public:
 
+    bool valid = true; // 图是否有效
     // 构造函数
     LineTrackingGraph() = default;
 

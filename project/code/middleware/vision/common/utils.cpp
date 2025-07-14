@@ -100,3 +100,59 @@ Point find_white_point(const uint8_t* image, uint16_t width, uint16_t height,
     return NULL_POINT;  // 遍历完所有点都没有找到白点
 }
 
+
+Point bfs_find_max_y_point(const uint8_t* image, int image_w, int image_h, Point start, uint8_t* visited)
+{
+    memset(visited, 0, image_w * image_h * sizeof(uint8_t));
+    if (start == NULL_POINT) return NULL_POINT;
+    // 1. 先找最近的白点
+    std::queue<Point> q;
+    q.push(start);
+    visited[start.y() * image_w + start.x()] = 1;
+    Point nearest_white = NULL_POINT;
+    while (!q.empty())
+    {
+        Point pt = q.front(); q.pop();
+        if (image[pt.y() * image_w + pt.x()] == 255)
+        {
+            nearest_white = pt;
+            break;
+        }
+        // 8邻域
+        for (int d = 0; d < 8; ++d)
+        {
+            int nx = pt.x() + dx[d];
+            int ny = pt.y() + dy[d];
+            if (nx >= 0 && nx < image_w && ny >= 0 && ny < image_h && !visited[ny * image_w + nx])
+            {
+                visited[ny * image_w + nx] = 1;
+                q.push(Point(nx, ny));
+            }
+        }
+    }
+    if (nearest_white == NULL_POINT) return NULL_POINT;
+    // 2. 只向y相等或更大的方向BFS找y最大点
+    memset(visited, 0, image_w * image_h * sizeof(uint8_t));
+    q = std::queue<Point>();
+    q.push(nearest_white);
+    visited[nearest_white.y() * image_w + nearest_white.x()] = 1;
+    Point max_y_point = nearest_white;
+    while (!q.empty())
+    {
+        Point pt = q.front(); q.pop();
+        if (pt.y() > max_y_point.y()) max_y_point = pt;
+        for (int d = 0; d < 8; ++d)
+        {
+            int nx = pt.x() + dx[d];
+            int ny = pt.y() + dy[d];
+            // 只向y相等或更大的方向扩展
+            if (ny < pt.y()) continue;
+            if (nx >= 0 && nx < image_w && ny >= 0 && ny < image_h && !visited[ny * image_w + nx] && image[ny * image_w + nx] == 255)
+            {
+                visited[ny * image_w + nx] = 1;
+                q.push(Point(nx, ny));
+            }
+        }
+    }
+    return max_y_point;
+};

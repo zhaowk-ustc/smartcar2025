@@ -11,6 +11,7 @@ void create_line_tracking_graph(
     const uint8_t* image,
     int image_w,
     int image_h,
+    Point last_seed_point,
     int search_seed_radius,
     int min_region_size,
     int dist_threshold,
@@ -35,7 +36,8 @@ vector<pair<Point, Point>> search_seed_points(
 );
 
 
-void get_depth_map(
+
+bool get_depth_map(
     const uint8_t* image,
     uint8_t* depth_map,
     int image_w,

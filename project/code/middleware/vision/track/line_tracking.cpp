@@ -15,6 +15,7 @@ void create_line_tracking_graph(
     const uint8_t* image,
     int image_w,
     int image_h,
+    Point last_seed_point,
     int search_seed_radius,
     int min_region_size,
     int dist_threshold,
@@ -29,18 +30,19 @@ void create_line_tracking_graph(
 {
     // 先清理图的状态
     graph.clear();
+    graph.valid = true;
 
-    vector<Point> start_points;
-    for (auto x = image_w / 4; x < image_w * 3 / 4; x++)
-    {
-        start_points.push_back(Point(x, image_h - 1));
-    }
-    Point seed_point = find_white_point(image, image_w, image_h,
-        start_points, SearchDirection::UP, image_h / 4);
+    Point seed_point = bfs_find_max_y_point(
+        image, image_w, image_h,
+        Point(last_seed_point.x(), image_h - 1),
+        visited
+    );
 
     if (seed_point == NULL_POINT)
     {
         // 处理未找到白点的情况
+        graph.clear();
+        graph.valid = false;
         return;
     }
 
@@ -62,19 +64,23 @@ void create_line_tracking_graph(
     }
 
     // Step 2: 对每个白点进行染色
-    std::vector<Point> final_link_points;
-    get_depth_map(image, depth_map, image_w, image_h, seed_points);
+    bool res = get_depth_map(image, depth_map, image_w, image_h, seed_points);
+    if (res == false)
+    {
+        // 如果染色失败，清理图并返回
+        graph.clear();
+        graph.valid = false;
+        seed_points.clear();
+        link_points.clear();
+        seed_link_points.clear();
+        return;
+    }
 
     // Step 3: 生成初始拓扑图
     build_graph(graph, depth_map, image_w, image_h,
         seed_link_points, point_to_node_map, dist_threshold);
 
     // Step 4: 图简化
-
-    // 设置简化参数
-    // int rdp_threshold = 30;           // RDP共线性阈值
-    // int branch_merge_threshold = 40;  // 分支合并距离阈值
-    // int min_branch_length = 5;       // 最小分支长度
 
     graph.simplify(rdp_threshold, branch_merge_threshold, min_branch_length);
 
@@ -290,7 +296,7 @@ vector<pair<Point, Point>> search_seed_points(
     return seed_link_points;
 }
 
-void get_depth_map(
+bool get_depth_map(
     const uint8_t* image,
     uint8_t* depth_map,
     int image_w,
@@ -308,8 +314,14 @@ void get_depth_map(
         if (depth_map[seed.y() * image_w + seed.x()] > 0) continue;
 
         // 调用 flood_fill_with_depth 对该连通域进行层次遍历染色
-        flood_fill_with_depth(image, depth_map, image_w, image_h, seed);
+        auto res = flood_fill_with_depth(image, depth_map, image_w, image_h, seed);
+        int max_count = res.second;
+        if (max_count >= (image_w + image_h) / 4)
+        {
+            return false;
+        }
     }
+    return true;
 }
 
 static void build_region_graph(

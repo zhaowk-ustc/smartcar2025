@@ -39,6 +39,7 @@ void VisionSystem::update()
     create_line_tracking_graph(
         vision_static_graph,
         calibrated_binary_image, calibrated_width, calibrated_height,
+        last_start_point,
         5, //search_seed_radius
         8, //min_region_size
         4, //dist_threshold
@@ -50,15 +51,23 @@ void VisionSystem::update()
         vision_visited,
         vision_point_to_node_map);
 
+    if (!vision_static_graph.valid)
+    {
+        last_start_point = Point(calibrated_width / 2, calibrated_height - 1);
+        vision_static_graph.clear();
+    }
+    else
+    {
+        last_start_point = vision_static_graph.getNode(vision_static_graph.root()).data();
+    }
+
     static TrackPath vision_static_track_path;
     vision_static_track_path.clear();
 
     extract_path(vision_static_graph, vision_static_track_path);
 
-    // 计算循迹偏差
-    // vision_outputs_shared.bias = get_bias(road_line, element_result, 80);
     memcpy(&vision_line_tracking_graph, &vision_static_graph, sizeof(vision_static_graph));
-    memcpy(&vision_outputs_shared.track_path,&vision_static_track_path,sizeof(vision_static_track_path));
+    memcpy(&vision_outputs_shared.track_path, &vision_static_track_path, sizeof(vision_static_track_path));
     SCB_CleanDCache_by_Addr((void*)&vision_line_tracking_graph, sizeof(vision_line_tracking_graph));
     SCB_CleanDCache_by_Addr((void*)&vision_debug_shared, sizeof(vision_debug_shared));
     SCB_CleanDCache_by_Addr((void*)&vision_outputs_shared, sizeof(vision_outputs_shared));

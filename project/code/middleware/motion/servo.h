@@ -61,6 +61,7 @@ private:
     int duty_mapping(float dir)
     {
         // 将方向映射到舵机的占空比范围
+        dir = -dir;
         if (dir < -1.0f) dir = -1.0f;
         if (dir > 1.0f) dir = 1.0f;
         return static_cast<int>(SERVO_MIN_DUTY + (SERVO_MAX_DUTY - SERVO_MIN_DUTY) * (dir + 1.0f) / 2.0f);

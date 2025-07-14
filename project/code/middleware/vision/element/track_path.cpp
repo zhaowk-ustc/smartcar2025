@@ -7,9 +7,12 @@ void extract_path(const LineTrackingGraph& graph, TrackPath& path)
     if (graph.empty()) return;
     int idx = graph.root();
     float total_length = 0.0f;
-    while (idx >= 0 && idx < graph.size())
+    const int max_steps = graph.size(); // 最大步数限制，防止死循环
+    int steps = 0;
+    while (idx >= 0 && idx < graph.size() && steps < max_steps)
     {
         const GraphNode& node = graph.getNode(idx);
+        ++steps;
 
         // 填充节点信息
         TrackPathNode path_node;
@@ -94,5 +97,11 @@ void extract_path(const LineTrackingGraph& graph, TrackPath& path)
             idx = succ[out_idx];
         }
     }
-    path.total_length = total_length;
+    if (steps >= max_steps) {
+        // 超过最大步数，可能存在环或异常，清空结果
+        path.clear();
+        path.total_length = 0.0f;
+    } else {
+        path.total_length = total_length;
+    }
 }

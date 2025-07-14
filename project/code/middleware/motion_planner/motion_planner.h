@@ -33,11 +33,14 @@ private:
     // {
     //     return count * 0.00030679616f;
     // }
+    void update_angle();
+    void update_speed();
 
     static float angle_to_servo(float angle)
     {
+        // 左负右正
         // 把角度映射到(-1, 1)范围内
-        return -angle;
+        return angle;
     }
 
     // float get_lookahead_distance(float speed) const
@@ -55,26 +58,17 @@ private:
     // Pure Pursuit 跟踪算法，输入路径、前瞻距离，输出主前瞻target点、主前瞻曲率、3/4前瞻曲率、实际主前瞻距离
     static std::tuple<Point2f, float, float, float> pure_pursuit(const TrackPath& path, float lookahead);
 
-    // // 屏幕坐标系转换为现实坐标系
-    // static Point2f screen_to_world(const Point2f& pt_screen, float cx, float cy, float scale = 1.0f)
-    // {
-    //     // fx, fy: 像素到实际距离的缩放系数（米/像素）
-    //     // cx, cy: 屏幕中心在像素坐标系下的位置
-    //     // scale: 额外缩放因子（如有需要）
-    //     float x_world = (pt_screen.x() - cx) * scale;
-    //     float y_world = (pt_screen.y() - cy) * scale;
-    //     return Point2f(x_world, y_world);
-    // }
+    void detect_u_turn(const TrackPath& path);
+    bool is_u_turn = false;
+    bool u_turn_direction_ = false; // 回弯的方向，false表示左侧回弯，true表示右侧回弯
 
-    // 批量将TrackPath从屏幕坐标转换为现实坐标
-    // static void path_screen_to_world(TrackPath& path_world, const TrackPath& path_screen, float cx, float cy, float scale = 1.0f)
-    // {
-    //     path_world = path_screen;
-    //     for (auto i = 0; i < path_world.size(); ++i)
-    //     {
-    //         path_world[i].pos = screen_to_world(path_world[i].pos, cx, cy, scale);
-    //     }
-    // }
+    bool in_roundabout_ = false; // 是否在环岛
+    bool roundabout_direction_ = false; // 环岛行驶方向，false表示左转，true表示右转
+    Point2f roundabout_point_; // 环岛入口点
+    bool in_cross_ = false; // 是否在十字路口
+    Point2f cross_point_; // 十字路口入口点
+
+    
 
 
 };

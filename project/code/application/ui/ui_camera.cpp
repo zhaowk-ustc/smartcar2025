@@ -78,43 +78,12 @@ void UI::display_overlay()
     memcpy(&ui_display_graph, &vision_line_tracking_graph, sizeof(vision_line_tracking_graph));
     static TrackPath ui_display_path;
     memcpy(&ui_display_path, &vision_outputs_shared.track_path, sizeof(vision_outputs_shared.track_path));
-    draw_path_and_graph_overlay(ui_display_path, ui_display_graph);
+    draw_path_overlay(ui_display_path);
 }
 
 // 融合显示路径和图结构
 void UI::draw_path_and_graph_overlay(const TrackPath& path, const LineTrackingGraph& graph)
 {
-    // 1. 先画path的连线（淡色）
-    for (size_t i = 0; i + 1 < path.size(); ++i)
-    {
-        const auto& n0 = path.nodes[i];
-        const auto& n1 = path.nodes[i + 1];
-        uint16_t x0 = camera_display_x_ + static_cast<int>(n0.pos.x());
-        uint16_t y0 = static_cast<int>(n0.pos.y());
-        uint16_t x1 = camera_display_x_ + static_cast<int>(n1.pos.x());
-        uint16_t y1 = static_cast<int>(n1.pos.y());
-        ips114_draw_line(x0, y0, x1, y1, RGB565_GRAY); // 路径用淡灰色
-    }
-    // 2. 再画graph的连线（高亮色）
-    for (size_t i = 0; i < graph.size(); ++i)
-    {
-        const GraphNode& node = graph.getNode(i);
-        if (node.type() == NodeType::DELETED) continue;
-        Point pt = node.data();
-        uint16_t x0 = camera_display_x_ + pt.x();
-        uint16_t y0 = pt.y();
-        for (int succ_idx : node.successors())
-        {
-            if (succ_idx >= 0 && succ_idx < graph.size())
-            {
-                const GraphNode& succ_node = graph.getNode(succ_idx);
-                Point succ_pt = succ_node.data();
-                uint16_t x1 = camera_display_x_ + succ_pt.x();
-                uint16_t y1 = succ_pt.y();
-                ips114_draw_line(x0, y0, x1, y1, RGB565_YELLOW); // 图结构用黄色
-            }
-        }
-    }
     // 3. 画path节点（小圆点）
     for (size_t i = 0; i < path.size(); ++i)
     {
@@ -123,27 +92,27 @@ void UI::draw_path_and_graph_overlay(const TrackPath& path, const LineTrackingGr
         uint16_t y = static_cast<int>(node.pos.y());
         uint16_t color = RGB565_GRAY;
         if (i == 0) color = RGB565_BLUE; // 起点高亮
-        draw_square(x, y, 2, color);
-    }
-    // 4. 画graph节点（大圆点，按类型区分颜色）
-    for (size_t i = 0; i < graph.size(); ++i)
-    {
-        const GraphNode& node = graph.getNode(i);
-        if (node.type() == NodeType::DELETED) continue;
-        Point pt = node.data();
-        uint16_t x = camera_display_x_ + pt.x();
-        uint16_t y = pt.y();
-        uint16_t color = RGB565_BLUE;
-        switch (node.type())
-        {
-            case NodeType::NORMAL: color = RGB565_BLUE; break;
-            case NodeType::ENDPOINT: color = RGB565_RED; break;
-            case NodeType::BRANCH: color = RGB565_GREEN; break;
-            case NodeType::START: color = RGB565_CYAN; break;
-            default: break;
-        }
         draw_square(x, y, 4, color);
     }
+    // // 4. 画graph节点（大圆点，按类型区分颜色）
+    // for (size_t i = 0; i < graph.size(); ++i)
+    // {
+    //     const GraphNode& node = graph.getNode(i);
+    //     if (node.type() == NodeType::DELETED) continue;
+    //     Point pt = node.data();
+    //     uint16_t x = camera_display_x_ + pt.x();
+    //     uint16_t y = pt.y();
+    //     uint16_t color = RGB565_BLUE;
+    //     switch (node.type())
+    //     {
+    //         case NodeType::NORMAL: color = RGB565_BLUE; break;
+    //         case NodeType::ENDPOINT: color = RGB565_RED; break;
+    //         case NodeType::BRANCH: color = RGB565_GREEN; break;
+    //         case NodeType::START: color = RGB565_CYAN; break;
+    //         default: break;
+    //     }
+    //     draw_square(x, y, 4, color);
+    // }
 
     char pos_buffer[32];
     snprintf(pos_buffer, sizeof(pos_buffer), "(%d, %d)",
@@ -346,11 +315,11 @@ void UI::draw_square(uint16 center_x, uint16 center_y, uint8 size, uint16 color)
 void UI::draw_path_overlay(const TrackPath& path)
 {
     // 绘制节点和连接线
-    uint16_t color_normal = RGB565_YELLOW;      // 绿色
-    uint16_t color_roundabout = RGB565_RED;    // 蓝色
-    uint16_t color_cross = RGB565_CYAN;       // 黄色
-    uint16_t color_uncertain = RGB565_BROWN;     // 灰色
-    uint16_t color_start = RGB565_BLUE;
+    uint16_t color_normal = RGB565_BLUE;
+    uint16_t color_roundabout = RGB565_RED;
+    uint16_t color_cross = RGB565_CYAN;
+    uint16_t color_uncertain = RGB565_BROWN;
+    uint16_t color_start = RGB565_GREEN;
 
     for (auto i = 0;i < path.size();i++)
     {
@@ -409,27 +378,35 @@ void UI::draw_path_overlay(const TrackPath& path)
             break;
         }
     }
-    screen_show_string(camera_display_x_, calibrated_height, "Element:", 10);
+    // screen_show_string(camera_display_x_, calibrated_height, "Element:", 10);
     switch (first_element)
     {
         case ElementType::NORMAL:
-            screen_show_string(camera_display_x_, calibrated_height + 16, "Normal", 10);
+            screen_show_string(camera_display_x_, calibrated_height, "Normal", 10);
             break;
         case ElementType::ROUNDABOUT:
-            screen_show_string(camera_display_x_, calibrated_height + 16, "Roundabout", 10);
+            screen_show_string(camera_display_x_, calibrated_height, "Roundabout", 10);
             break;
         case ElementType::CROSS:
-            screen_show_string(camera_display_x_, calibrated_height + 16, "Cross", 10);
+            screen_show_string(camera_display_x_, calibrated_height, "Cross", 10);
             break;
         case ElementType::UNCERTAIN:
-            screen_show_string(camera_display_x_, calibrated_height + 16, "Uncertain", 10);
+            screen_show_string(camera_display_x_, calibrated_height, "Uncertain", 10);
             break;
         default:
-            screen_show_string(camera_display_x_, calibrated_height + 16, "Unknown", 10);
+            screen_show_string(camera_display_x_, calibrated_height, "Unknown", 10);
             break;
     }
-    screen_show_string(camera_display_x_, calibrated_height + 32, "Pos:", 10);
+    // screen_show_string(camera_display_x_, calibrated_height + 32, "Pos:", 10);
     char pos_buffer[32];
     snprintf(pos_buffer, sizeof(pos_buffer), "(%d, %d)", static_cast<int>(first_pos.x()), static_cast<int>(first_pos.y()));
-    screen_show_string(camera_display_x_, calibrated_height + 48, pos_buffer, 10);
+    screen_show_string(camera_display_x_, calibrated_height + 16, pos_buffer, 10);
+    snprintf(pos_buffer, sizeof(pos_buffer), "(%d, %d)", static_cast<int>(vision_debug_shared.pure_pursuit_target.x()), static_cast<int>(vision_debug_shared.pure_pursuit_target.y()));
+    screen_show_string(camera_display_x_, calibrated_height + 32, pos_buffer, 10);
+    if (vision_debug_shared.pure_pursuit_target.x() > 0.01f && vision_debug_shared.pure_pursuit_target.y() > 0.01f)
+    {
+        int screen_x = camera_display_x_ + static_cast<int>(vision_debug_shared.pure_pursuit_target.x());
+        int screen_y = static_cast<int>(vision_debug_shared.pure_pursuit_target.y());
+        draw_square(screen_x, screen_y, 3, RGB565_YELLOW); // 绘制目标点
+    }
 }

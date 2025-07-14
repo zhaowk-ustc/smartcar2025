@@ -4,9 +4,9 @@
 #include <stdint.h>
 
 constexpr uint16_t calibrated_width = 70;
-constexpr uint16_t calibrated_height = 53;
-constexpr uint16_t calibrated_size = 70 * 53;
-constexpr uint16_t aligned_calibrated_size = 70 * 54;
+constexpr uint16_t calibrated_height = 42;
+constexpr uint16_t calibrated_size = 70 * 42;
+constexpr uint16_t aligned_calibrated_size = 70 * 42;
 
 void image_calibration(uint8_t* dest_image_data, const uint8_t* source_image_data);
 

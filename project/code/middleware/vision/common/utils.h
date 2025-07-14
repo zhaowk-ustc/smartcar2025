@@ -70,3 +70,5 @@ inline float pointToLineDistance(const Point& point, const Point& lineStart, con
     float distance = std::abs(a * point.x() + b * point.y() + c) / std::sqrtf(a * a + b * b);
     return distance;
 }
+
+Point bfs_find_max_y_point(const uint8_t* image, int image_w, int image_h, Point start, uint8_t* visited);

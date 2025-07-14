@@ -75,7 +75,7 @@ private:
         CALIBRATED,
         CALIBRATED_BINARIZED
     };
-    CameraDisplayMode camera_display_mode_ = CameraDisplayMode::CALIBRATED;
+    CameraDisplayMode camera_display_mode_ = CameraDisplayMode::CALIBRATED_BINARIZED;
     void select_camera_display_mode();
     static constexpr uint16 camera_display_x_ = 18 * 8; // 摄像头显示的起始X坐标
     void display_camera();

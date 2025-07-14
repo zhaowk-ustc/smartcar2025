@@ -4,6 +4,7 @@
 #include "zf_common_headfile.h"
 #include "middleware/module_base.h"
 #include "middleware/debug/debuggable.h"
+#include "middleware/vision/common/point.h"
 
 class VisionSystem : public Module, public IDebuggable
 {
@@ -16,6 +17,9 @@ public:
     void init() override;
     void reset() override;
     void update() override;
+
+    Point last_start_point; // 上一次的起点
+    Point last_end_point; // 上一次的终点
 
 };
 
