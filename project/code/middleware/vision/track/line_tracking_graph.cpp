@@ -202,14 +202,15 @@ void LineTrackingGraph::merge_nearby_branches()
         }
     }
 
-    // 对每个分支节点，收集从它开始的所有段
-    for (int branch_idx : branch_nodes)
+    // 迭代式处理分支节点合并，允许push_back新节点并继续处理
+    for (size_t i = 0; i < branch_nodes.size(); ++i)
     {
+        int branch_idx = branch_nodes[i];
         if (nodes[branch_idx].predecessor() == -2) continue; // 跳过已删除的节点
 
         auto successors = nodes[branch_idx].successors();
 
-        for (int successor_idx = 0; successor_idx < successors.size(); ++successor_idx)
+        for (int successor_idx : successors)
         {
             if (successor_idx < 0 || successor_idx >= node_count) continue;
             if (nodes[successor_idx].predecessor() == -2) continue; // 跳过已删除的节点
@@ -295,7 +296,7 @@ void LineTrackingGraph::merge_nearby_branches()
                             nodes[segment[i]].set_type(NodeType::DELETED);
                         }
 
-                        branch_nodes.push_back(new_node_idx); // 将新节点加入分支节点列表
+                        branch_nodes.push_back(new_node_idx); // 直接push_back新节点，后续自动处理
                     }
                 }
             }
