@@ -353,7 +353,8 @@ static void build_region_graph(
         // 清空当前层
         current_layer.clear();
         int16_t current_node_idx = -1; // 当前处理的节点
-        Point current_node_point = NULL_POINT; // 当前节点对应的代表点
+        std::vector<Point> cluster_points; // 当前聚类像素集合
+        Point2f cluster_center(0, 0); // 当前聚类重心
 
         // 对上一层的每个像素点进行处理
         for (const auto& pt : prev_layer)
@@ -366,32 +367,54 @@ static void build_region_graph(
             const auto& neighbors = pt.neighbors();
             for (const auto& neighbor : neighbors)
             {
-                // 如果是当前层未处理过的节点
                 if (inBounds(neighbor.x(), neighbor.y(), image_w, image_h) &&
                     point_to_node_map[neighbor.y() * image_w + neighbor.x()] == -1 &&
-                    image[neighbor.y() * image_w + neighbor.x()] != 0) // 确保是白色像素
+                    image[neighbor.y() * image_w + neighbor.x()] != 0)
                 {
                     current_layer.push_back(neighbor);
-                    // 如果当前节点索引未设置或像素超出聚类阈值
-                    if (current_node_idx == -1 ||
-                        manhattanDist(neighbor, current_node_point) > dist_thresh)
+                    if (current_node_idx == -1)
                     {
+                        // 新建节点
                         current_node_idx = graph.addNode(neighbor);
-                        if (current_node_idx == -1)
-                        {
-                            // 图已满，无法添加更多节点
-                            return;
-                        }
-                        current_node_point = neighbor;
+                        cluster_points.clear();
+                        cluster_points.push_back(neighbor);
+                        cluster_center = Point2f(neighbor.x(), neighbor.y());
                         point_to_node_map[neighbor.y() * image_w + neighbor.x()] = current_node_idx;
-                        // 连接节点
                         graph.getNode(node_idx).add_successor(current_node_idx);
                         graph.getNode(current_node_idx).set_predecessor(node_idx);
                     }
                     else
                     {
-                        // 如果当前节点已经存在，直接使用现有节点索引
-                        point_to_node_map[neighbor.y() * image_w + neighbor.x()] = current_node_idx;
+                        // 计算新重心
+                        cluster_points.push_back(neighbor);
+                        float sum_x = 0, sum_y = 0;
+                        for (const auto& cpt : cluster_points)
+                        {
+                            sum_x += cpt.x();
+                            sum_y += cpt.y();
+                        }
+                        cluster_center = Point2f(sum_x / cluster_points.size(), sum_y / cluster_points.size());
+
+                        if (manhattanDist(neighbor, Point(
+                            static_cast<int>(std::round(cluster_center.x())),
+                            static_cast<int>(std::round(cluster_center.y())))) > dist_thresh)
+                        {
+                            // 超出阈值，新建节点
+                            current_node_idx = graph.addNode(neighbor);
+                            cluster_points.clear();
+                            cluster_points.push_back(neighbor);
+                            cluster_center = Point2f(neighbor.x(), neighbor.y());
+                            point_to_node_map[neighbor.y() * image_w + neighbor.x()] = current_node_idx;
+                            graph.getNode(node_idx).add_successor(current_node_idx);
+                            graph.getNode(current_node_idx).set_predecessor(node_idx);
+                        }
+                        else
+                        {
+                            // 属于当前聚类
+                            point_to_node_map[neighbor.y() * image_w + neighbor.x()] = current_node_idx;
+                            // 更新当前节点的data为最新重心
+                            graph.getNode(current_node_idx).set_data(Point(static_cast<int>(std::round(cluster_center.x())), static_cast<int>(std::round(cluster_center.y()))));
+                        }
                     }
                 }
             }
@@ -449,29 +472,4 @@ void build_graph(
         }
 
     }
-
-    // return graph;
 }
-
-// vector<Point> get_line_elements(const LineTrackingGraph& graph)
-// {
-//     vector<Point> line_points;
-
-//     auto start = graph.root();
-//     while()
-//     // 从根节点开始，进行深度优先遍历
-//     std::function<void(int)> dfs = [&](int node_idx)
-//     {
-//         const auto& node = graph.getNode(node_idx);
-//         line_points.push_back(node.data());
-
-//         for (int successor : node.successors())
-//         {
-//             dfs(successor);
-//         }
-//     };
-
-//     dfs(graph.root());
-
-//     return line_points;
-// }

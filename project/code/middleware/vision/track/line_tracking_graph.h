@@ -87,6 +87,8 @@ public:
 
     Point data() const { return data_; }
 
+    void set_data(const Point& pt) { data_ = pt; }
+
     NodeType type() const { return type_; }
 
     void set_type(NodeType new_type) { type_ = new_type; }
