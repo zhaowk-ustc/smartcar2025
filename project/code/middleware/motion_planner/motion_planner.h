@@ -33,6 +33,7 @@ private:
     // {
     //     return count * 0.00030679616f;
     // }
+    void update_element();
     void update_angle();
     void update_speed();
 
@@ -57,6 +58,8 @@ private:
 
     // Pure Pursuit 跟踪算法，输入路径、前瞻距离，输出主前瞻target点、主前瞻曲率、3/4前瞻曲率、实际主前瞻距离
     static std::tuple<Point2f, float, float, float> pure_pursuit(const TrackPath& path, float lookahead);
+
+    bool miss_line = false; // 是否偏离路径
 
     void detect_u_turn(const TrackPath& path);
     bool is_u_turn = false;
