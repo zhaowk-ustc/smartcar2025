@@ -1,14 +1,13 @@
 #include "motion_controller.h"
 #include "config/motion_config.h"
 
-MotionController::MotionController(const Config& config) :
-    left_motor_(config.left_motor_config),
-    right_motor_(config.right_motor_config),
-    left_encoder_(config.left_encoder_config),
-    right_encoder_(config.right_encoder_config),
-    servo_(config.servo_config),
-    speed_pid_(config.speed_pid_params),
-    direction_pid_(config.direction_pid_params)
+MotionController::MotionController(const Config &config) : left_motor_(config.left_motor_config),
+                                                           right_motor_(config.right_motor_config),
+                                                           left_encoder_(config.left_encoder_config),
+                                                           right_encoder_(config.right_encoder_config),
+                                                           servo_(config.servo_config),
+                                                           speed_pid_(config.speed_pid_params),
+                                                           direction_pid_(config.direction_pid_params)
 {
     // 连接输入输出接口
     left_encoder_.connect_outputs(&left_encoder_count_);
@@ -85,10 +84,10 @@ void MotionController::update()
 }
 
 void MotionController::connect_inputs(
-    const float* input_speed,
-    const float* input_speed_accel,
-    const float* input_direction,
-    const float* input_direction_accel)
+    const float *input_speed,
+    const float *input_speed_accel,
+    const float *input_direction,
+    const float *input_direction_accel)
 {
     input_speed_ = input_speed;
     input_speed_accel_ = input_speed_accel;

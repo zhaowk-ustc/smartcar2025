@@ -1512,6 +1512,63 @@
                 </file>
             </group>
             <group>
+                <name>guandao</name>
+                <file>
+                    <name>$PROJ_DIR$\..\..\code\middleware\guandao\control.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\code\middleware\guandao\control.h</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\code\middleware\guandao\Display.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\code\middleware\guandao\Display.h</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\code\middleware\guandao\filter.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\code\middleware\guandao\filter.h</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\code\middleware\guandao\flash.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\code\middleware\guandao\flash.h</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\code\middleware\guandao\Guandao_Plus.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\code\middleware\guandao\Guandao_Plus.h</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\code\middleware\guandao\imu.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\code\middleware\guandao\imu.h</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\code\middleware\guandao\Key.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\code\middleware\guandao\Key.h</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\code\middleware\guandao\motor.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\code\middleware\guandao\motor.h</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\code\middleware\guandao\PID.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\code\middleware\guandao\PID.h</name>
+                </file>
+            </group>
+            <group>
                 <name>motion</name>
                 <file>
                     <name>$PROJ_DIR$\..\..\code\middleware\motion\encoder.h</name>

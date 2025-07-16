@@ -22,23 +22,22 @@ public:
 
     static constexpr float kIntegralLimit = 10000.0f; // 积分限幅
 
-    PID(const Params& params):
-        kp_(params.kp), ki_(params.ki), kd_(params.kd), kd2_(params.kd2)
+    PID(const Params &params) : kp_(params.kp), ki_(params.ki), kd_(params.kd), kd2_(params.kd2)
     {
         setup_debug_vars();
     }
 
     void connect_inputs(
-        const float* input_setpoint,
-        const float* input_measured_value,
-        const float* input_feedforward = nullptr)
+        const float *input_setpoint,
+        const float *input_measured_value,
+        const float *input_feedforward = nullptr)
     {
         input_setpoint_ = input_setpoint;
         input_measured_value_ = input_measured_value;
         input_feedforward_ = input_feedforward;
     }
 
-    void connect_outputs(float* output)
+    void connect_outputs(float *output)
     {
         output_ = output;
     }
@@ -55,17 +54,19 @@ public:
 
         integral_ += error_;
         // 积分限幅
-        if (integral_ > kIntegralLimit) integral_ = kIntegralLimit;
-        if (integral_ < -kIntegralLimit) integral_ = -kIntegralLimit;
+        if (integral_ > kIntegralLimit)
+            integral_ = kIntegralLimit;
+        if (integral_ < -kIntegralLimit)
+            integral_ = -kIntegralLimit;
 
         // 导数计算
         derivative_ = error_ - previous_error_;
 
         // PID输出计算
         *output_ = kp_ * error_ +
-            ki_ * integral_ +
-            kd_ * derivative_ +
-            kd2_ * feedforward;
+                   ki_ * integral_ +
+                   kd_ * derivative_ +
+                   kd2_ * feedforward;
 
         // 更新状态
         previous_error_ = error_;
@@ -79,7 +80,7 @@ public:
     }
 
     // 参数设置
-    void setParams(const Params& params)
+    void setParams(const Params &params)
     {
         kp_ = params.kp;
         ki_ = params.ki;
@@ -107,12 +108,12 @@ private:
     float previous_setpoint_;
 
     // 输入指针
-    const float* input_setpoint_;
-    const float* input_measured_value_;
-    const float* input_feedforward_;
+    const float *input_setpoint_;
+    const float *input_measured_value_;
+    const float *input_feedforward_;
 
     // 输出变量
-    float* output_;
+    float *output_;
 
     void setup_debug_vars() override
     {
