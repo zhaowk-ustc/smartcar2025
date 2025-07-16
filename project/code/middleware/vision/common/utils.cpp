@@ -110,8 +110,11 @@ Point bfs_find_max_y_point(const uint8_t* image, int image_w, int image_h, Point
     q.push(start);
     visited[start.y() * image_w + start.x()] = 1;
     Point nearest_white = NULL_POINT;
-    while (!q.empty())
+    int max_bfs_steps = 72; // 限制最大步数
+    int bfs_steps = 0;
+    while (!q.empty() && bfs_steps < max_bfs_steps)
     {
+        ++bfs_steps;
         Point pt = q.front(); q.pop();
         if (image[pt.y() * image_w + pt.x()] == 255)
         {
@@ -130,6 +133,10 @@ Point bfs_find_max_y_point(const uint8_t* image, int image_w, int image_h, Point
             }
         }
     }
+    if (bfs_steps >= max_bfs_steps) return NULL_POINT;
+
+
+
     if (nearest_white == NULL_POINT) return NULL_POINT;
     // 2. 只向y相等或更大的方向BFS找y最大点
     memset(visited, 0, image_w * image_h * sizeof(uint8_t));

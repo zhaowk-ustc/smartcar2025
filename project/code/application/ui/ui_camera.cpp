@@ -72,13 +72,14 @@ void UI::select_camera_display_mode()
 void UI::display_overlay()
 {
     SCB_InvalidateDCache_by_Addr((void*)&vision_debug_shared, sizeof(vision_debug_shared));
-    SCB_InvalidateDCache_by_Addr((void*)&vision_outputs_shared, sizeof(vision_outputs_shared));
+    // SCB_InvalidateDCache_by_Addr((void*)&vision_outputs_shared, sizeof(vision_outputs_shared));
     SCB_InvalidateDCache_by_Addr((void*)&vision_line_tracking_graph, sizeof(vision_line_tracking_graph));
     static LineTrackingGraph ui_display_graph;
     memcpy(&ui_display_graph, &vision_line_tracking_graph, sizeof(vision_line_tracking_graph));
     static TrackPath ui_display_path;
     memcpy(&ui_display_path, &vision_outputs_shared.track_path, sizeof(vision_outputs_shared.track_path));
     draw_path_overlay(ui_display_path);
+    // draw_graph_overlay(ui_display_graph);
 }
 
 // 融合显示路径和图结构

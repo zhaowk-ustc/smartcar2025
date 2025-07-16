@@ -40,12 +40,12 @@ void VisionSystem::update()
         vision_static_graph,
         calibrated_binary_image, calibrated_width, calibrated_height,
         last_start_point,
-        5, //search_seed_radius
-        8, //min_region_size
-        4, //dist_threshold
-        6, //rdp_threshold
+        7, //search_seed_radius
+        4, //min_region_size
+        2, //dist_threshold
+        3, //rdp_threshold
         20, //branch_merge_threshold
-        10, //min_branch_length
+        6, //min_branch_length
         vision_ttl_map,
         vision_depth_map,
         vision_visited,

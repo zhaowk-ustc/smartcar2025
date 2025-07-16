@@ -88,7 +88,6 @@ void Car::setup_debug_vars()
 void Car::update_multicore()
 {
     SCB_InvalidateDCache_by_Addr((void*)&vision_outputs_shared, sizeof(vision_outputs_shared));
-    SCB_InvalidateDCache_by_Addr((void*)&vision_outputs_shared, sizeof(vision_outputs_shared));
     memcpy(&car_path, &vision_outputs_shared.track_path, sizeof(TrackPath));
     target_direction = vision_outputs_shared.bias;
 

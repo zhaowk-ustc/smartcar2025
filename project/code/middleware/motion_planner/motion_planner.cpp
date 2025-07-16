@@ -16,35 +16,61 @@ void MotionPlanner::reset()
 
 void MotionPlanner::update()
 {
-    if (!input_path_ || input_path_->size() < 2)
-    {
-        // 如果没有输入路径或路径节点数小于2，直接返回
-        *output_target_speed_ = 0.0f;
-        *output_target_angle_ = 0.0f;
-        return;
-    }
-
+    // if (!input_path_ || input_path_->size() < 2)
+    // {
+    //     // 如果没有输入路径或路径节点数小于2，直接返回
+    //     *output_target_speed_ = 0.0f;
+    //     *output_target_angle_ = 0.0f;
+    //     return;
+    // }
+    update_element();
     update_angle();
     update_speed();
 }
 
-void MotionPlanner::update_angle()
+
+static TrackPath planner_path;
+
+void MotionPlanner::update_element()
 {
-    static TrackPath planner_path;
     memcpy(&planner_path, &vision_outputs_shared.track_path, sizeof(vision_outputs_shared.track_path));
 
-    if (planner_path.size() < 2)
+    if (planner_path.size() < 2 || planner_path.length() < 8.0f)
     {
-        // 如果路径节点数小于2，无法进行规划
-        *output_target_speed_ = 0.0f;
-        *output_target_angle_ = 0.0f;
+        miss_line = true;
+    }
+    else
+    {
+        miss_line = false;
+        detect_u_turn(planner_path);
+    }
+
+}
+
+void MotionPlanner::update_angle()
+{
+    float angle, angle2;
+    if (miss_line)
+    {
+        if (u_turn_direction_)
+        {
+            // 右侧回弯
+            angle = 1.0f; // 右侧打角到最大
+        }
+        else
+        {
+            // 左侧回弯
+            angle = -1.0f; // 左侧打角到最大
+        }
+        *output_target_angle_ = angle_to_servo(angle);
+        *output_target_angle_vel_ = 0;
         return;
     }
 
     // 1. 计算主前瞻曲率和3/4前瞻曲率和实际主前瞻距离
     float lookahead = 20.0f;
     Point2f target_point;
-    float angle, angle2, actual_lookahead;
+    float actual_lookahead;
     float angle_vel = 0.0f; // 曲率变化率，暂时设为0
     std::tie(target_point, angle, angle2, actual_lookahead) = pure_pursuit(planner_path, lookahead);
 
@@ -146,10 +172,18 @@ void MotionPlanner::detect_u_turn(const TrackPath& path)
     Point2f start = path.start();
     Point2f end = path.end();
 
+    if (U_TURN_THRESHOLD <= end.y())
+    {
+        u_turn_direction_ = (end.x() > start.x()); // 根据x方向判断U型转弯方向
+    }
+
     // 如果end的y过小，认为发生了U型转弯
     if (end.y() < U_TURN_THRESHOLD)
     {
         is_u_turn = true;
-        u_turn_direction_ = (end.x() > start.x()); // 根据x方向判断U型转弯方向
+    }
+    else
+    {
+        is_u_turn = false;
     }
 }
