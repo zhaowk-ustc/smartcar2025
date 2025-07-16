@@ -43,7 +43,7 @@ void VisionSystem::update()
         7, //search_seed_radius
         4, //min_region_size
         2, //dist_threshold
-        4, //rdp_threshold
+        3, //rdp_threshold
         20, //branch_merge_threshold
         6, //min_branch_length
         vision_ttl_map,

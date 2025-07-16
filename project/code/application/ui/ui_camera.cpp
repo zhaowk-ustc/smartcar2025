@@ -72,7 +72,7 @@ void UI::select_camera_display_mode()
 void UI::display_overlay()
 {
     SCB_InvalidateDCache_by_Addr((void*)&vision_debug_shared, sizeof(vision_debug_shared));
-    SCB_InvalidateDCache_by_Addr((void*)&vision_outputs_shared, sizeof(vision_outputs_shared));
+    // SCB_InvalidateDCache_by_Addr((void*)&vision_outputs_shared, sizeof(vision_outputs_shared));
     SCB_InvalidateDCache_by_Addr((void*)&vision_line_tracking_graph, sizeof(vision_line_tracking_graph));
     static LineTrackingGraph ui_display_graph;
     memcpy(&ui_display_graph, &vision_line_tracking_graph, sizeof(vision_line_tracking_graph));

@@ -106,11 +106,11 @@ void create_line_tracking_graph(
         int valid_successor_count = 0;
         for (int succ_idx : successors)
         {
-            if (succ_idx >= 0 && succ_idx < graph.size() &&
-                graph.getNode(succ_idx).type() != NodeType::DELETED)
-            {
+            // if (succ_idx >= 0 && succ_idx < graph.size() &&
+            //     graph.getNode(succ_idx).type() != NodeType::DELETED)
+            // {
                 valid_successor_count++;
-            }
+            // }
         }
 
         // 检查前驱节点是否有效
