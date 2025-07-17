@@ -16,40 +16,16 @@ void MotionPlanner::reset()
 
 void MotionPlanner::update()
 {
-    // if (!input_path_ || input_path_->size() < 2)
-    // {
-    //     // 如果没有输入路径或路径节点数小于2，直接返回
-    //     *output_target_speed_ = 0.0f;
-    //     *output_target_angle_ = 0.0f;
-    //     return;
-    // }
+    planner_path = *input_path_;
+
     update_element();
     update_angle();
     update_speed();
 }
 
-
-static TrackPath planner_path;
-
-void MotionPlanner::update_element()
-{
-    memcpy(&planner_path, &vision_outputs_shared.track_path, sizeof(vision_outputs_shared.track_path));
-
-    if (planner_path.size() < 2 || planner_path.length() < 8.0f)
-    {
-        miss_line = true;
-    }
-    else
-    {
-        miss_line = false;
-        detect_u_turn(planner_path);
-    }
-
-}
-
 void MotionPlanner::update_angle()
 {
-    float angle, angle2;
+    // float angle, angle2;
     if (miss_line)
     {
         if (u_turn_direction_)
@@ -160,30 +136,4 @@ std::tuple<Point2f, float, float, float> MotionPlanner::pure_pursuit(const Track
     float curvature2 = x_r2 / (actual_lookahead2 > 1e-6f ? actual_lookahead2 : 1.0f);
 
     return std::tuple<Point2f, float, float, float>(target, curvature, curvature2, actual_lookahead);
-}
-
-constexpr float U_TURN_THRESHOLD = calibrated_height * 0.2f; // U型转弯的y阈值
-void MotionPlanner::detect_u_turn(const TrackPath& path)
-{
-    if (path.size() < 2)
-    {
-        return;
-    }
-    Point2f start = path.start();
-    Point2f end = path.end();
-
-    if (U_TURN_THRESHOLD <= end.y())
-    {
-        u_turn_direction_ = (end.x() > start.x()); // 根据x方向判断U型转弯方向
-    }
-
-    // 如果end的y过小，认为发生了U型转弯
-    if (end.y() < U_TURN_THRESHOLD)
-    {
-        is_u_turn = true;
-    }
-    else
-    {
-        is_u_turn = false;
-    }
 }

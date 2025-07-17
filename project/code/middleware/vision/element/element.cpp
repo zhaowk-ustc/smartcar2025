@@ -20,6 +20,7 @@ pair<ElementType, int> detect_branch_element(const Point2f& in_vec, const vector
         return { type,out_idx };
     }
     vector<complex<float>> out_dirs;
+    float abs_sin_sum = 0.0f;
     float sin_sum = 0.0f;
 
     complex<float> in_complex(in_vec.x(), in_vec.y());
@@ -33,16 +34,20 @@ pair<ElementType, int> detect_branch_element(const Point2f& in_vec, const vector
         float sin = out_complex.imag();
         out_dirs.push_back(out_complex);
 
-        sin_sum += abs(sin);
+        abs_sin_sum += abs(sin);
+        sin_sum += sin; // 累计sin值
     }
     switch (out_vecs.size())
     {
         case 3:
-            if (abs(sin_sum) <= 1.5)
+            if (abs(abs_sin_sum) <= 1.5)
             {
-                type = ElementType::ROUNDABOUT;
+                // 用 sin_sum 的正负号区分左/右环岛
+                if (sin_sum > 0)
+                    type = ElementType::RIGHT_ROUNDABOUT;
+                else
+                    type = ElementType::LEFT_ROUNDABOUT;
                 // 找到cos第二大的方向
-                // 排序找第二大
                 std::vector<std::pair<float, int>> cos_with_idx;
                 for (int i = 0; i < out_dirs.size(); ++i)
                     cos_with_idx.emplace_back(out_dirs[i].real(), i);

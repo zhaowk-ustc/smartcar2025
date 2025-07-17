@@ -34,7 +34,8 @@ struct VisionOutputsShared
 // 除图像外只读调试数据
 struct VisionDebugShared
 {
- Point2f pure_pursuit_target;
+    Point2f pure_pursuit_target;
+    LineTrackingGraph line_tracking_graph;
 };
 
 extern VisionConfigShared vision_config_shared;

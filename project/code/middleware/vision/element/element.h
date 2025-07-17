@@ -12,7 +12,9 @@ enum class ElementType : int8_t
 {
     NORMAL,
     CROSS,      // 十字路口
-    ROUNDABOUT, // 环岛
+    LEFT_ROUNDABOUT, // 左侧环岛
+    RIGHT_ROUNDABOUT, // 右侧环岛
+    U_TURN,     // U型转弯
     UNCERTAIN,  // 不确定
 };
 

@@ -72,10 +72,8 @@ void UI::select_camera_display_mode()
 void UI::display_overlay()
 {
     SCB_InvalidateDCache_by_Addr((void*)&vision_debug_shared, sizeof(vision_debug_shared));
-    // SCB_InvalidateDCache_by_Addr((void*)&vision_outputs_shared, sizeof(vision_outputs_shared));
-    SCB_InvalidateDCache_by_Addr((void*)&vision_line_tracking_graph, sizeof(vision_line_tracking_graph));
     static LineTrackingGraph ui_display_graph;
-    memcpy(&ui_display_graph, &vision_line_tracking_graph, sizeof(vision_line_tracking_graph));
+    memcpy(&ui_display_graph, &vision_debug_shared.line_tracking_graph, sizeof(vision_debug_shared.line_tracking_graph));
     static TrackPath ui_display_path;
     memcpy(&ui_display_path, &vision_outputs_shared.track_path, sizeof(vision_outputs_shared.track_path));
     draw_path_overlay(ui_display_path);
@@ -336,7 +334,8 @@ void UI::draw_path_overlay(const TrackPath& path)
                 color = color_normal;
                 node_radius = 3;
                 break;
-            case ElementType::ROUNDABOUT:
+            case ElementType::LEFT_ROUNDABOUT:
+            case ElementType::RIGHT_ROUNDABOUT:
                 color = color_roundabout;
                 node_radius = 6;
                 break;
@@ -385,9 +384,11 @@ void UI::draw_path_overlay(const TrackPath& path)
         case ElementType::NORMAL:
             screen_show_string(camera_display_x_, calibrated_height, "Normal", 10);
             break;
-        case ElementType::ROUNDABOUT:
-            screen_show_string(camera_display_x_, calibrated_height, "Roundabout", 10);
+        case ElementType::LEFT_ROUNDABOUT:
+            screen_show_string(camera_display_x_, calibrated_height, "Left Roundabout", 10);
             break;
+        case ElementType::RIGHT_ROUNDABOUT:
+            screen_show_string(camera_display_x_, calibrated_height, "Right Roundabout", 10);
         case ElementType::CROSS:
             screen_show_string(camera_display_x_, calibrated_height, "Cross", 10);
             break;

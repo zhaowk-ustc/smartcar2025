@@ -1276,6 +1276,9 @@
             <group>
                 <name>motion_planner</name>
                 <file>
+                    <name>$PROJ_DIR$\..\..\code\middleware\motion_planner\element_handler.cpp</name>
+                </file>
+                <file>
                     <name>$PROJ_DIR$\..\..\code\middleware\motion_planner\motion_planner.cpp</name>
                 </file>
                 <file>

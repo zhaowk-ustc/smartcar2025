@@ -31,6 +31,3 @@ VisionDebugShared vision_debug_shared = {
 
 
 };
-
-#pragma location = 0x28050000
-LineTrackingGraph vision_line_tracking_graph;
