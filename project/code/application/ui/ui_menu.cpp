@@ -55,18 +55,17 @@ void UI::display_vars()
  */
 void UI::display_cursor()
 {
-    int cursor_y;
+    int cursor_y = (current_var_index_ % vars_per_page_) * 16;
 
-    for (int i = 0; i < 8; i++)
+    for (int i = 0; i < 7; i++)
     {
-        cursor_y = (i % vars_per_page_) * 16;
-        if (i == current_var_index_)
+        if (i == (current_var_index_ % vars_per_page_))
         {
             screen_show_string(menu_display_x_, cursor_y, ">");
         }
         else
         {
-            screen_show_string(menu_display_x_, cursor_y, " ");
+            screen_show_string(menu_display_x_, i * 16, " ");
         }
     }
 }
