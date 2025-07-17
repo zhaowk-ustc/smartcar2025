@@ -37,7 +37,7 @@ std::string serial_read_line()
     pos = debug_buffer.find_first_of("\r\n");
     if (pos != std::string::npos)
     {
-        std::string line = debug_buffer.substr(0, pos);
+        std::string line = debug_buffer.substr(1, pos);
         size_t next_pos = debug_buffer.find_first_not_of("\r\n", pos);
         if (next_pos == std::string::npos)
             debug_buffer.clear();

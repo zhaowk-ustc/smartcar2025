@@ -5,6 +5,7 @@
 #include "motor.h"
 #include "encoder.h"
 #include "servo.h"
+#include "pos.h"
 #include "../module_base.h"
 
 class MotionController : public Module, public IDebuggable
@@ -46,6 +47,8 @@ private:
     // PID控制器
     PID speed_pid_;
 
+    Position position_;
+
     // 输入
     const float* input_speed_;
     const float* input_speed_accel_; 
@@ -61,14 +64,20 @@ private:
     int16 left_encoder_count_;
     int16 right_encoder_count_;
 
-    float current_speed_;
-    float current_direction_ = 0.0f; // 当前方向，初始为0
+    float average_encoder_count;
+
+    float angle_vel_;
+
 
     float speed_pid_output_;
 
     int16 left_motor_duty_;
     int16 right_motor_duty_;
     float servo_dir_;
+    
+    float global_x;
+    float global_y;
+    float global_yaw_;
 
     void setup_debug_vars() override;
 

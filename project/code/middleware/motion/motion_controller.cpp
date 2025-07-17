@@ -11,11 +11,14 @@ speed_pid_(config.speed_pid_params)
     // 连接输入输出接口
     left_encoder_.connect_outputs(&left_encoder_count_);
     right_encoder_.connect_outputs(&right_encoder_count_);
-    speed_pid_.connect_inputs(&target_speed, &current_speed_, &target_speed_accel);
+    speed_pid_.connect_inputs(&target_speed, &average_encoder_count, &target_speed_accel);
     speed_pid_.connect_outputs(&speed_pid_output_);
     left_motor_.connect_inputs(&left_motor_duty_);
     right_motor_.connect_inputs(&right_motor_duty_);
     servo_.connect_inputs(&servo_dir_);
+
+    position_.connect_inputs(&average_encoder_count, &angle_vel_);
+    position_.connect_outputs(&global_x, &global_y, &global_yaw_);
     setup_debug_vars();
 }
 
@@ -45,7 +48,7 @@ void MotionController::reset()
     // 清除内部状态
     left_encoder_count_ = 0;
     right_encoder_count_ = 0;
-    current_speed_ = 0.0f;
+    average_encoder_count = 0.0f;
     speed_pid_output_ = 0.0f;
     left_motor_duty_ = 0;
     right_motor_duty_ = 0;
@@ -61,8 +64,12 @@ void MotionController::update()
 
     left_encoder_.update();
     right_encoder_.update();
+    average_encoder_count = (left_encoder_count_ + right_encoder_count_) / 2.0f;
 
-    current_speed_ = (left_encoder_count_ + right_encoder_count_) / 2.0f;
+    icm20602_get_gyro();
+    icm20602_gyro_z -= 11;
+    angle_vel_ = icm20602_gyro_transition(icm20602_gyro_z);
+    position_.update();
 
     speed_pid_.update();
 
@@ -93,8 +100,11 @@ void MotionController::setup_debug_vars()
     speed_pid_.export_debug_vars(this, "pid_s.");
     add_debug_var("lenc", make_readonly_var("lenc", &left_encoder_count_));
     add_debug_var("renc", make_readonly_var("renc", &right_encoder_count_));
-    add_debug_var("spd", make_readonly_var("spd", &current_speed_));
-    add_debug_var("lpwm", make_readonly_var("lpwm", &left_motor_duty_));
-    add_debug_var("rpwm", make_readonly_var("rpwm", &right_motor_duty_));
-    add_debug_var("servodir", make_debug_var("servodir", &servo_dir_));
+    add_debug_var("spd", make_readonly_var("spd", &average_encoder_count));
+    // add_debug_var("lpwm", make_readonly_var("lpwm", &left_motor_duty_));
+    // add_debug_var("rpwm", make_readonly_var("rpwm", &right_motor_duty_));
+    // add_debug_var("servodir", make_debug_var("servodir", &servo_dir_));
+    add_debug_var("global_x", make_readonly_var("global_x", &global_x));
+    add_debug_var("global_y", make_readonly_var("global_y", &global_y));
+    add_debug_var("global_yaw", make_readonly_var("global_yaw", &global_yaw_));
 }

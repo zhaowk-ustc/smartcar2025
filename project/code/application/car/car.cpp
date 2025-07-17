@@ -55,7 +55,6 @@ void Car::update_pit5ms()
 
 void Car::update_pit10ms()
 {
-
     motion_controller.update();
 }
 
