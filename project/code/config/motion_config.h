@@ -15,13 +15,6 @@ constexpr PID::Params speed_pid_params = {
     .kd2 = 0.0f
 };
 
-constexpr PID::Params direction_pid_params = {
-    .kp = 1.0f,
-    .ki = 0.0f,
-    .kd = 0.00f,
-    .kd2 = 0.0f
-};
-
 constexpr MotionPlanner::Config motion_planner_config = {
     .max_speed = 1.0f,
     .max_speed_accel = 0.5f,
@@ -69,8 +62,7 @@ constexpr MotionController::Config motion_controller_config = {
     .servo_config = servo_config,
 
     // 控制参数
-    .speed_pid_params = speed_pid_params,
-    .direction_pid_params = direction_pid_params
+    .speed_pid_params = speed_pid_params
 };
 
 

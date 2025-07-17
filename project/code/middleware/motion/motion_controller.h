@@ -21,7 +21,6 @@ public:
 
         // 控制参数
         PID::Params speed_pid_params;
-        PID::Params direction_pid_params;
     };
 
     // 初始化构造函数
@@ -46,7 +45,6 @@ private:
 
     // PID控制器
     PID speed_pid_;
-    PID direction_pid_;
 
     // 输入
     const float* input_speed_;
@@ -67,7 +65,6 @@ private:
     float current_direction_ = 0.0f; // 当前方向，初始为0
 
     float speed_pid_output_;
-    float direction_pid_output_;
 
     int16 left_motor_duty_;
     int16 right_motor_duty_;

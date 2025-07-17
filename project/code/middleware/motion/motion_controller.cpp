@@ -1,22 +1,18 @@
 #include "motion_controller.h"
 #include "config/motion_config.h"
 
-MotionController::MotionController(const Config &config) : left_motor_(config.left_motor_config),
-                                                           right_motor_(config.right_motor_config),
-                                                           left_encoder_(config.left_encoder_config),
-                                                           right_encoder_(config.right_encoder_config),
-                                                           servo_(config.servo_config),
-                                                           speed_pid_(config.speed_pid_params),
-                                                           direction_pid_(config.direction_pid_params)
+MotionController::MotionController(const Config& config) : left_motor_(config.left_motor_config),
+right_motor_(config.right_motor_config),
+left_encoder_(config.left_encoder_config),
+right_encoder_(config.right_encoder_config),
+servo_(config.servo_config),
+speed_pid_(config.speed_pid_params)
 {
     // 连接输入输出接口
     left_encoder_.connect_outputs(&left_encoder_count_);
     right_encoder_.connect_outputs(&right_encoder_count_);
-
     speed_pid_.connect_inputs(&target_speed, &current_speed_, &target_speed_accel);
     speed_pid_.connect_outputs(&speed_pid_output_);
-    direction_pid_.connect_inputs(&target_direction, &current_direction_, &target_direction_accel);
-    direction_pid_.connect_outputs(&direction_pid_output_);
     left_motor_.connect_inputs(&left_motor_duty_);
     right_motor_.connect_inputs(&right_motor_duty_);
     servo_.connect_inputs(&servo_dir_);
@@ -45,14 +41,12 @@ void MotionController::reset()
 
     // 重置PID控制器状态
     speed_pid_.reset();
-    direction_pid_.reset();
 
     // 清除内部状态
     left_encoder_count_ = 0;
     right_encoder_count_ = 0;
     current_speed_ = 0.0f;
     speed_pid_output_ = 0.0f;
-    direction_pid_output_ = 0.0f;
     left_motor_duty_ = 0;
     right_motor_duty_ = 0;
     servo_dir_ = 0;
@@ -71,12 +65,11 @@ void MotionController::update()
     current_speed_ = (left_encoder_count_ + right_encoder_count_) / 2.0f;
 
     speed_pid_.update();
-    direction_pid_.update();
 
     left_motor_duty_ = static_cast<int16>(speed_pid_output_);
     right_motor_duty_ = static_cast<int16>(speed_pid_output_);
 
-    servo_dir_ = direction_pid_output_;
+    servo_dir_ = target_direction;
 
     left_motor_.update();
     right_motor_.update();
@@ -84,10 +77,10 @@ void MotionController::update()
 }
 
 void MotionController::connect_inputs(
-    const float *input_speed,
-    const float *input_speed_accel,
-    const float *input_direction,
-    const float *input_direction_accel)
+    const float* input_speed,
+    const float* input_speed_accel,
+    const float* input_direction,
+    const float* input_direction_accel)
 {
     input_speed_ = input_speed;
     input_speed_accel_ = input_speed_accel;
@@ -98,7 +91,6 @@ void MotionController::connect_inputs(
 void MotionController::setup_debug_vars()
 {
     speed_pid_.export_debug_vars(this, "pid_s.");
-    direction_pid_.export_debug_vars(this, "pid_d.");
     add_debug_var("lenc", make_readonly_var("lenc", &left_encoder_count_));
     add_debug_var("renc", make_readonly_var("renc", &right_encoder_count_));
     add_debug_var("spd", make_readonly_var("spd", &current_speed_));
