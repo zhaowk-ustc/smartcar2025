@@ -6,7 +6,7 @@ UI::Key UI::get_key_input()
     uint16 voltage;
     voltage = adc_convert(ADC0_CH00_P06_0);
 
-    if (0 <= voltage and voltage <= 18)
+    if (voltage <= 18)
     { // voltage == 0
         return Key::LEFT;
     }
@@ -41,10 +41,17 @@ void UI::update_key_state()
 {
     // 读取当前按键状态并更新 current_key_
     auto key = get_key_input();
-    if (key != Key::NONE)
+    
+    if (key != Key::NONE and key != pre_key_)
     {
         current_key_ = key;
     }
+    else
+    {
+        current_key_ = Key::NONE;
+    }
+
+    pre_key_ = key;
 }
 
 void UI::handle_current_key()
