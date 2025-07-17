@@ -52,6 +52,7 @@ private:
         ENTER,
     };
     Key current_key_ = Key::NONE; // 当前按键状态
+    Key pre_key_ = Key::NONE;
     static Key get_key_input();
     void update_key_state();
     void handle_current_key();
