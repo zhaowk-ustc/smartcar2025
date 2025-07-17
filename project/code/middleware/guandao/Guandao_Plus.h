@@ -9,6 +9,8 @@
 #define CODE_GUANDAO_PLUS_H_
 
 #include "zf_common_headfile.h"
+#include "imu.h"
+#include "filter.h"
 #include <stdbool.h>
 
 extern uint8_t road_memery_finish_Plus_flag; // 路径记忆完成标志位

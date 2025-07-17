@@ -5,16 +5,9 @@
  *      Author: 林林林
  */
 #include "zf_common_headfile.h"
-#include <stdbool.h> // 引入 stdbool.h
-#include "control.h"
-#include "flash.h"
-#include "imu.h"
-#include "motor.h"
-#include "PID.h"
-#include "Display.h"
 #include "Guandao_Plus.h"
-#include "key.h"
-#include "filter.h"
+#include <stdbool.h> // 引入 stdbool.h
+
 /**
  * ======= 纯跟踪算法可调参数区域 =======
  * 以下参数影响Pure Pursuit算法的性能和效率，可根据实际场景调整

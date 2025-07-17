@@ -6,17 +6,12 @@
  */
 
 #include "zf_common_headfile.h"
-#include "control.h"
-#include "flash.h"
-#include "imu.h"
-#include "motor.h"
-#include "PID.h"
-#include "Display.h"
-#include "Guandao_Plus.h"
-#include "key.h"
 #include "filter.h"
 
-LowPassFilter velocity_filter = {0};
+LowPassFilter velocity_filter={0};
+
+
+
 
 void LPF_InitByAlpha(LowPassFilter *filter, float alpha)
 {

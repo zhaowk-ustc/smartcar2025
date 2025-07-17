@@ -5,25 +5,19 @@
  *      Author: 林林林
  */
 #include "zf_common_headfile.h"
-#include "control.h"
-#include "flash.h"
 #include "imu.h"
-#include "motor.h"
-#include "PID.h"
-#include "Display.h"
-#include "Guandao_Plus.h"
-#include "key.h"
 #include "filter.h"
-uint8_t gyro_zero_flag = 0, acc_zero_flag = 0; // 零飘标定完成标志位初始化
-volatile float yaw_plus = 0;                   // 小车机体坐标系y轴与东天北or全局坐标系y轴夹角(逆时针为正，顺时针为负，范围[-pi,pi])
 
-volatile float yaw = 0;      // 实时航偏角初始化
-volatile float yaw_last = 0; // 中值积分航偏角前后状态初始化
-volatile float yaw_now;      // 中值积分航偏角前后状态初始化
+uint8_t gyro_zero_flag = 0, acc_zero_flag=0; // 零飘标定完成标志位初始化
+volatile float yaw_plus = 0; // 小车机体坐标系y轴与东天北or全局坐标系y轴夹角(逆时针为正，顺时针为负，范围[-pi,pi])
 
-volatile float acc_y_speed = 0; // 实时小车实际速度初始化
-volatile float acc_last = 0;    // 中值积分加速度前后状态初始化
-volatile float acc_now;         // 中值积分加速度前后状态初始化
+volatile float yaw = 0;                    // 实时航偏角初始化
+volatile float yaw_last = 0;               // 中值积分航偏角前后状态初始化
+volatile float yaw_now;                    // 中值积分航偏角前后状态初始化
+
+volatile float acc_y_speed = 0;      // 实时小车实际速度初始化
+volatile float acc_last = 0;         // 中值积分加速度前后状态初始化
+volatile float acc_now;      // 中值积分加速度前后状态初始化
 
 float yaw_memery[FLASH_PAGE_LENGTH] = {0}; // 记录的航偏角
 float yaw_store[FLASH_PAGE_LENGTH] = {0};  // 打点储存的历史航偏角
@@ -110,6 +104,8 @@ void gyro_yaw_integral(void)
     yaw_now = gyro_param.gyro_z;
     yaw += -(yaw_last + yaw_now) / 2 * 0.005 * 0.0633; // 中值积分法
 
+   
+
     yaw_last = yaw_now;
 
     yaw_plus += ((yaw_last + yaw_now) / 2 * 0.005 * 0.0633) * pi / 180.00; // 逆时针为正，顺时针为负
@@ -125,6 +121,7 @@ void gyro_yaw_integral(void)
     // 规范到[-180,180]度
 }
 
+
 // 中值积分算速度
 void acc_y_integral(void)
 {
@@ -135,7 +132,9 @@ void acc_y_integral(void)
     acc_param.acc_y = LPF_Update(&velocity_filter, acc_param.acc_y);
 
     acc_now = acc_param.acc_y;
-    acc_y_speed += (acc_last + acc_now) / 2 * 0.005 * 0.01; // 中值积分法
+    acc_y_speed += (acc_last + acc_now) / 2 * 0.005*0.01; // 中值积分法
 
     acc_last = acc_now;
+
+  
 }
