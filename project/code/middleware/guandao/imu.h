@@ -9,7 +9,7 @@
 #define CODE_IMU_H_
 #include "zf_common_headfile.h"
 
-#define pi (3.14f)
+#define pi (PI)
 
 typedef struct
 {

@@ -10,7 +10,7 @@ UI::UI()
 void UI::init()
 {
     ips114_init();
-
+    adc_init(ADC0_CH00_P06_0, ADC_8BIT);
 }
 
 void UI::update_mainloop()
