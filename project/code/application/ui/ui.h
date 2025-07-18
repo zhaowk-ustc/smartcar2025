@@ -40,6 +40,7 @@ private:
     void prev_item();
     void next_page();
     void prev_page();
+    void change_mod();
 
     // ui_keymap.cpp 中的函数
     enum class Key
@@ -65,6 +66,8 @@ private:
     // ui_menu.cpp 中的函数
     static constexpr uint16 menu_display_x_ = 0 * 8;
     bool need_clear_ = false; // 是否需要清屏
+    bool edit_mode_ = false;  // 是否处于编辑模式
+
     static void screen_show_string(const uint16 x, const uint16 y, const string& str, const uint8 len = UINT8_MAX);
     void display_menu();
     void display_vars();

@@ -83,12 +83,39 @@ void UI::handle_current_key()
 
 void UI::on_key_up()
 {
-    prev_item();
+    if (edit_mode_) {
+        // 在编辑模式下，上键增加变量值
+        const DebugVar* current_var = var_ptrs_[current_var_index_];
+        // 如果变量有递增函数，则调用它
+        if (current_var->increment) {
+            current_var->increment();
+        }
+        screen_show_string(menu_display_x_ + 12 * 8, 
+                          (current_var_index_ % vars_per_page_) * 16, 
+                          "[" + current_var->get() + "]", 
+                          5);
+    } else {
+        // 在显示模式下，上键移动光标
+        prev_item();
+    }
 }
 
 void UI::on_key_down()
 {
-    next_item();
+    if (edit_mode_) {
+        // 在编辑模式下，下键减少变量值
+        const DebugVar* current_var = var_ptrs_[current_var_index_];
+        if (current_var->decrement) {
+            current_var->decrement();
+        }
+        screen_show_string(menu_display_x_ + 12 * 8, 
+                          (current_var_index_ % vars_per_page_) * 16, 
+                          "[" + current_var->get() + "]", 
+                          5);
+    } else {
+        // 在显示模式下，下键移动光标
+        next_item();
+    }
 }
 
 void UI::on_key_left()
@@ -103,5 +130,14 @@ void UI::on_key_right()
 
 void UI::on_key_enter()
 {
-    // 处理确认操作
+    if (!edit_mode_) {
+        // 在显示模式下按Enter切换模式
+        change_mod();
+    } else {
+        // 在编辑模式下按Enter确认修改
+        const DebugVar* current_var = var_ptrs_[current_var_index_];
+        // 这里可以添加变量值修改的逻辑
+        // 例如：current_var->set(new_value);
+        change_mod();  // 切换回显示模式
+    }
 }
