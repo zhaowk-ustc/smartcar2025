@@ -61,7 +61,7 @@ void UI::display_cursor()
     {
         if (i == (current_var_index_ % vars_per_page_))
         {
-            screen_show_string(menu_display_x_, cursor_y, ">");
+            screen_show_string(menu_display_x_, cursor_y, "*");
         }
         else
         {
@@ -72,6 +72,6 @@ void UI::display_cursor()
 
 void UI::display_page_info()
 {
-    string page_info = "Page " + to_string(current_page_ + 1) + "/" + to_string(total_pages_);
+    string page_info = "Page " + to_string(current_page_ + 1) + "/" + to_string(total_pages_) + (edit_mode_ ? " change " : " display");
     screen_show_string(menu_display_x_, vars_per_page_ * 16, page_info);
 }

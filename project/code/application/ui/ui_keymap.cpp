@@ -86,8 +86,10 @@ void UI::on_key_up()
     if (edit_mode_) {
         // 在编辑模式下，上键增加变量值
         const DebugVar* current_var = var_ptrs_[current_var_index_];
-        // 这里添加增加变量值的逻辑
-        // 例如：current_var->increment();
+        // 如果变量有递增函数，则调用它
+        if (current_var->increment) {
+            current_var->increment();
+        }
         screen_show_string(menu_display_x_ + 12 * 8, 
                           (current_var_index_ % vars_per_page_) * 16, 
                           "[" + current_var->get() + "]", 
@@ -103,8 +105,9 @@ void UI::on_key_down()
     if (edit_mode_) {
         // 在编辑模式下，下键减少变量值
         const DebugVar* current_var = var_ptrs_[current_var_index_];
-        // 这里添加减少变量值的逻辑
-        // 例如：current_var->decrement();
+        if (current_var->decrement) {
+            current_var->decrement();
+        }
         screen_show_string(menu_display_x_ + 12 * 8, 
                           (current_var_index_ % vars_per_page_) * 16, 
                           "[" + current_var->get() + "]", 
