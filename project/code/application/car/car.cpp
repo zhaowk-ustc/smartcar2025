@@ -11,8 +11,12 @@ Car::Car(const Car::Config& config)
         &target_speed_accel,
         &target_direction,
         &target_direction_accel);
-
-    motion_planner.connect_inputs(&car_path);
+    motion_controller.connect_outputs(
+        &global_x,
+        &global_y,
+        &global_yaw);
+    motion_planner.connect_inputs(&car_path,
+        &global_x, &global_y, &global_yaw);
     motion_planner.connect_outputs(
         &target_speed,
         &target_speed_accel,

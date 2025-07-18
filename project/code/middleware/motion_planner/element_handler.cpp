@@ -5,7 +5,7 @@
 void MotionPlanner::update_element()
 {
 
-    if (planner_path.size() < 2 || planner_path.length() < 8.0f)
+    if (planner_local_path.size() < 2 || planner_local_path.length() < 8.0f)
     {
         miss_line = true;
     }
@@ -17,27 +17,21 @@ void MotionPlanner::update_element()
         // 遍历planner_path找到第一个元素
         int first_element_idx = -1;
         ElementType first_element_type = ElementType::NORMAL;
-        for (size_t i = 0; i < planner_path.size(); ++i)
+        for (size_t i = 0; i < planner_local_path.size(); ++i)
         {
-            if (planner_path[i].element == ElementType::CROSS ||
-                planner_path[i].element == ElementType::LEFT_ROUNDABOUT ||
-                planner_path[i].element == ElementType::RIGHT_ROUNDABOUT)
+            if (planner_local_path[i].element == ElementType::CROSS ||
+                planner_local_path[i].element == ElementType::LEFT_ROUNDABOUT ||
+                planner_local_path[i].element == ElementType::RIGHT_ROUNDABOUT)
             {
                 first_element_idx = i;
-                first_element_type = planner_path[i].element;
-                break;
-            }
-            {
-                first_element_idx = i;
-                first_element_type = planner_path[i].element;
+                first_element_type = planner_local_path[i].element;
                 break;
             }
         }
 
-        // 可选：记录第一个元素的点
         if (first_element_idx != -1)
         {
-            current_element_point = planner_path[first_element_idx].pos;
+            current_element_point = planner_local_path[first_element_idx].pos;
             current_element_type = first_element_type;
         }
 
@@ -45,7 +39,7 @@ void MotionPlanner::update_element()
         // 检测u型转弯
         if (current_element_type != ElementType::NORMAL)
         {
-            auto u_turn_res = detect_u_turn(planner_path);
+            auto u_turn_res = detect_u_turn(planner_local_path);
             auto is_u_turn = std::get<0>(u_turn_res);
             u_turn_direction_ = std::get<1>(u_turn_res);
             current_element_point = std::get<2>(u_turn_res);

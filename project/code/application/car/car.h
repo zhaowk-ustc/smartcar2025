@@ -46,6 +46,10 @@ private:
     float target_direction;
     float target_direction_accel;
 
+    float global_x = 0.0f; // 全局X坐标
+    float global_y = 0.0f; // 全局Y坐标
+    float global_yaw = 0.0f; // 全局偏航角
+
 
     // 标志位
     bool debug_flag_ = false;

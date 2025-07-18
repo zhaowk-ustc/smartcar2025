@@ -23,14 +23,17 @@ public:
     void init();
     void reset();
     void update();
-    void connect_inputs(const TrackPath* path);
+    void connect_inputs(const TrackPath* path, const float* current_x, const float* current_y, const float* current_yaw);
     void connect_outputs(float* target_speed, float* target_speed_accel,
         float* target_angle, float* target_angle_vel);
 
 private:
     const TrackPath* input_path_ = nullptr;
-
-    TrackPath planner_path; // 规划路径
+    const float* input_current_x_ = nullptr;
+    const float* input_current_y_ = nullptr;
+    const float* input_current_yaw_ = nullptr;
+    TrackPath planner_local_path;
+    TrackPath planner_global_path;
 
     void update_element();
 
@@ -81,6 +84,9 @@ private:
     float* output_target_speed_accel_; // 目标速度加速度
     float* output_target_angle_; // 目标曲率
     float* output_target_angle_vel_;
+
+    void path_local_to_global(TrackPath& global_path, const TrackPath& local_path);
+    void path_global_to_local(TrackPath& local_path, const TrackPath& global_path);
 
 };
 

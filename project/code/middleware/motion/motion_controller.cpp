@@ -81,6 +81,10 @@ void MotionController::update()
     left_motor_.update();
     right_motor_.update();
     servo_.update();
+
+    *output_global_x_ = global_x;
+    *output_global_y_ = global_y;
+    *output_global_yaw_ = global_yaw_;
 }
 
 void MotionController::connect_inputs(
@@ -93,6 +97,16 @@ void MotionController::connect_inputs(
     input_speed_accel_ = input_speed_accel;
     input_direction_ = input_direction;
     input_direction_accel_ = input_direction_accel;
+}
+
+void MotionController::connect_outputs(
+    float* global_x,
+    float* global_y,
+    float* global_yaw)
+{
+    output_global_x_ = global_x;
+    output_global_y_ = global_y;
+    output_global_yaw_ = global_yaw;
 }
 
 void MotionController::setup_debug_vars()

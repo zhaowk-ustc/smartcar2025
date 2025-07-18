@@ -32,9 +32,13 @@ public:
     void reset() override;
 
     void connect_inputs(const float* input_speed,
-                        const float* input_speed_accel,
-                        const float* input_direction,
-                        const float* input_direction_accel);
+        const float* input_speed_accel,
+        const float* input_direction,
+        const float* input_direction_accel);
+
+    void connect_outputs(float* global_x,
+        float* global_y,
+        float* global_yaw);
 
 private:
     // 硬件组件
@@ -51,9 +55,13 @@ private:
 
     // 输入
     const float* input_speed_;
-    const float* input_speed_accel_; 
+    const float* input_speed_accel_;
     const float* input_direction_;
     const float* input_direction_accel_;
+    float* output_global_x_;
+    float* output_global_y_;
+    float* output_global_yaw_;
+
     float target_speed;
     float target_speed_accel;
     float target_direction;
@@ -74,7 +82,7 @@ private:
     int16 left_motor_duty_;
     int16 right_motor_duty_;
     float servo_dir_;
-    
+
     float global_x;
     float global_y;
     float global_yaw_;

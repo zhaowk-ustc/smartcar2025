@@ -16,7 +16,7 @@ void MotionPlanner::reset()
 
 void MotionPlanner::update()
 {
-    planner_path = *input_path_;
+    planner_local_path = *input_path_;
 
     update_element();
     update_angle();
@@ -48,7 +48,7 @@ void MotionPlanner::update_angle()
     Point2f target_point;
     float actual_lookahead;
     float angle_vel = 0.0f; // 曲率变化率，暂时设为0
-    std::tie(target_point, angle, angle2, actual_lookahead) = pure_pursuit(planner_path, lookahead);
+    std::tie(target_point, angle, angle2, actual_lookahead) = pure_pursuit(planner_local_path, lookahead);
 
     // 2. 计算曲率变化率（曲率对时间的导数，简单差分）
     // static float last_curvature = 0.0f;
@@ -73,9 +73,14 @@ void MotionPlanner::update_speed()
     *output_target_speed_accel_ = accel;
 }
 
-void MotionPlanner::connect_inputs(const TrackPath* path)
+void MotionPlanner::connect_inputs(const TrackPath* path, const float* current_x, const float* current_y, const float* current_yaw)
 {
+    // 连接输入变量
     input_path_ = path;
+
+    input_current_x_ = current_x;
+    input_current_y_ = current_y;
+    input_current_yaw_ = current_yaw;
 }
 
 void MotionPlanner::connect_outputs(float* target_speed, float* target_speed_accel,
@@ -136,4 +141,58 @@ std::tuple<Point2f, float, float, float> MotionPlanner::pure_pursuit(const Track
     float curvature2 = x_r2 / (actual_lookahead2 > 1e-6f ? actual_lookahead2 : 1.0f);
 
     return std::tuple<Point2f, float, float, float>(target, curvature, curvature2, actual_lookahead);
+}
+
+void MotionPlanner::path_local_to_global(TrackPath& global_path,const TrackPath& local_path)
+{
+    global_path = local_path;
+    // 将路径从局部坐标系转换到全局坐标系
+    if (input_current_x_ && input_current_y_ && input_current_yaw_)
+    {
+        float global_x = *input_current_x_;
+        float global_y = *input_current_y_;
+        float global_yaw = *input_current_yaw_;
+
+        float cos_yaw = cos(global_yaw);
+        float sin_yaw = sin(global_yaw);
+
+        for (size_t i = 0; i < global_path.size(); ++i)
+        {
+            Point2f& pos = global_path[i].pos;
+            float x_new = global_x + pos.x() * cos_yaw - pos.y() * sin_yaw;
+            float y_new = global_y + pos.x() * sin_yaw + pos.y() * cos_yaw;
+            pos = Point2f(x_new, y_new);
+        }
+    }
+    else
+    {
+        global_path.clear();
+    }
+}
+
+void MotionPlanner::path_global_to_local(TrackPath& local_path, const TrackPath& global_path)
+{
+    local_path = global_path;
+    // 将路径从全局坐标系转换到局部坐标系
+    if (input_current_x_ && input_current_y_ && input_current_yaw_)
+    {
+        float global_x = *input_current_x_;
+        float global_y = *input_current_y_;
+        float global_yaw = *input_current_yaw_;
+
+        float cos_yaw = cos(global_yaw);
+        float sin_yaw = sin(global_yaw);
+
+        for (size_t i = 0; i < local_path.size(); ++i)
+        {
+            Point2f& pos = local_path[i].pos;
+            float x_new = (pos.x() - global_x) * cos_yaw + (pos.y() - global_y) * sin_yaw;
+            float y_new = -(pos.x() - global_x) * sin_yaw + (pos.y() - global_y) * cos_yaw;
+            pos = Point2f(x_new, y_new);
+        }
+    }
+    else
+    {
+        local_path.clear();
+    }
 }
