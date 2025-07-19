@@ -143,7 +143,7 @@ std::tuple<Point2f, float, float, float> MotionPlanner::pure_pursuit(const Track
     return std::tuple<Point2f, float, float, float>(target, curvature, curvature2, actual_lookahead);
 }
 
-void MotionPlanner::path_local_to_global(TrackPath& global_path,const TrackPath& local_path)
+void MotionPlanner::path_local_to_global(TrackPath& global_path, const TrackPath& local_path)
 {
     global_path = local_path;
     // 将路径从局部坐标系转换到全局坐标系

@@ -25,6 +25,11 @@ pair<ElementType, int> detect_branch_element(const Point2f& in_vec, const vector
 
     complex<float> in_complex(in_vec.x(), in_vec.y());
 
+    if ((abs(in_complex.real()) + abs(in_complex.imag())) < 0.5)
+    {
+        in_complex = { 0,-1 };
+    }
+
     for (const auto& dir : out_vecs)
     {
         complex<float> out_complex(dir.x(), dir.y());
@@ -35,7 +40,7 @@ pair<ElementType, int> detect_branch_element(const Point2f& in_vec, const vector
         out_dirs.push_back(out_complex);
 
         abs_sin_sum += abs(sin);
-        sin_sum += sin; // 累计sin值
+        sin_sum += sin;
     }
     switch (out_vecs.size())
     {

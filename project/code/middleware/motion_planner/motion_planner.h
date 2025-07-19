@@ -27,6 +27,8 @@ public:
     void connect_outputs(float* target_speed, float* target_speed_accel,
         float* target_angle, float* target_angle_vel);
 
+    int update_count;
+
 private:
     const TrackPath* input_path_ = nullptr;
     const float* input_current_x_ = nullptr;

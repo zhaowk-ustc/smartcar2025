@@ -47,9 +47,6 @@ void Car::update_mainloop()
         ui.update_mainloop();
         ui_flag_ = false;
     }
-    update_multicore();
-
-    motion_planner.update();
 }
 
 void Car::update_pit5ms()
@@ -59,6 +56,13 @@ void Car::update_pit5ms()
 
 void Car::update_pit10ms()
 {
+    update_multicore();
+    if (motion_planner.update_count != vision_outputs_shared.update_count)
+    {
+        motion_planner.update();
+        motion_planner.update_count = vision_outputs_shared.update_count;
+    }
+
     motion_controller.update();
 }
 
@@ -92,6 +96,5 @@ void Car::update_multicore()
 {
     SCB_InvalidateDCache_by_Addr((void*)&vision_outputs_shared, sizeof(vision_outputs_shared));
     memcpy(&car_path, &vision_outputs_shared.track_path, sizeof(TrackPath));
-    target_direction = vision_outputs_shared.bias;
 
 }

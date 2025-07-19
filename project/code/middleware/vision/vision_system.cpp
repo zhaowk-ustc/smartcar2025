@@ -66,6 +66,8 @@ void VisionSystem::update()
 
     extract_path(vision_static_graph, vision_static_track_path);
 
+    vision_outputs_shared.update_count++;
+
     memcpy(&vision_debug_shared.line_tracking_graph, &vision_static_graph, sizeof(vision_static_graph));
     memcpy(&vision_outputs_shared.track_path, &vision_static_track_path, sizeof(vision_static_track_path));
     SCB_CleanDCache_by_Addr((void*)&vision_debug_shared, sizeof(vision_debug_shared));

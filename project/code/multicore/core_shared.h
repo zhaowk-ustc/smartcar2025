@@ -23,12 +23,9 @@ struct VisionConfigShared
 
 struct VisionOutputsShared
 {
-    float bias;                        // 循迹偏差
-    float bias_accel;                // 循迹偏差加速度
-    float target_speed;               // 目标速度
-    float target_speed_accel;        // 目标速度加速度
-
     TrackPath track_path;
+
+    int update_count;
 };
 
 // 除图像外只读调试数据
