@@ -110,7 +110,7 @@ Point bfs_find_max_y_point(const uint8_t* image, int image_w, int image_h, Point
     q.push(start);
     visited[start.y() * image_w + start.x()] = 1;
     Point nearest_white = NULL_POINT;
-    int max_bfs_steps = 72; // 限制最大步数
+    int max_bfs_steps = 100; // 限制最大步数
     int bfs_steps = 0;
     while (!q.empty() && bfs_steps < max_bfs_steps)
     {

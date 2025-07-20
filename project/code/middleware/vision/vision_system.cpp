@@ -35,14 +35,14 @@ void VisionSystem::update()
 
     static uint8 threshold;
     static int miss_line_count = 0;
-    if (vision_outputs_shared.miss_line == false)
+    // if (vision_outputs_shared.miss_line == false)
     {
         threshold = advanced_otsu_threshold_with_mask(calibrated_image, calibration_mask, calibrated_size);
     }
-    else
-    {
-        miss_line_count++;
-    }
+    // else
+    // {
+        // miss_line_count++;
+    // }
 
     apply_binarization_with_mask(calibrated_image, calibrated_binary_image, calibration_mask, calibrated_size, threshold);
     // image_binarization_with_mask(calibrated_image, calibrated_binary_image, calibration_mask, calibrated_size);
@@ -52,7 +52,7 @@ void VisionSystem::update()
         vision_static_graph,
         calibrated_binary_image, calibrated_width, calibrated_height,
         last_start_point,
-        7, //search_seed_radius
+        5, //search_seed_radius
         4, //min_region_size
         2, //dist_threshold
         3, //rdp_threshold

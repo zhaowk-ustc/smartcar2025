@@ -55,8 +55,8 @@ private:
 
     // 常量定义
     static constexpr uint16 SERVO_FREQ = 200;
-    static constexpr uint16 SERVO_MAX_DUTY = 1800 * SERVO_FREQ / 100;
-    static constexpr uint16 SERVO_MIN_DUTY = 1400 * SERVO_FREQ / 100;
+    static constexpr uint16 SERVO_MAX_DUTY = 1830 * SERVO_FREQ / 100;
+    static constexpr uint16 SERVO_MIN_DUTY = 1370 * SERVO_FREQ / 100;
 
     int duty_mapping(float dir)
     {

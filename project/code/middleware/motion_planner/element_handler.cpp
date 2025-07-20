@@ -29,27 +29,46 @@ void MotionPlanner::update_element()
             }
         }
 
-        if (first_element_idx != -1)
+        static ElementType last_detected_type = ElementType::NORMAL;
+        static int detected_count = 0;
+        const int DETECT_THRESHOLD = 5; // 连续检测阈值，可调整
+        // if (first_element_idx != -1)
         {
-            current_element_point = planner_local_path[first_element_idx].pos;
-            current_element_type = first_element_type;
+            if (first_element_type == last_detected_type)
+            {
+                detected_count++;
+            }
+            else
+            {
+                detected_count = 1;
+                last_detected_type = first_element_type;
+            }
+            if (detected_count >= DETECT_THRESHOLD)
+            {
+                current_element_point = planner_local_path[first_element_idx].pos;
+                current_element_type = first_element_type;
+            }
         }
+        // else
+        // {
+        //     detected_count = 0;
+        //     last_detected_type = ElementType::NORMAL;
+        // }
 
 
         // 检测u型转弯
-        if (current_element_type != ElementType::NORMAL)
-        {
-            auto u_turn_res = detect_u_turn(planner_local_path);
-            auto is_u_turn = std::get<0>(u_turn_res);
-            if (is_u_turn)
-            {
-                u_turn_direction_ = std::get<1>(u_turn_res);
-                current_element_point = std::get<2>(u_turn_res);
-            }
+        // if (current_element_type != ElementType::NORMAL)
+        // {
+        //     auto u_turn_res = detect_u_turn(planner_local_path);
+        //     auto is_u_turn = std::get<0>(u_turn_res);
+        //     if (is_u_turn)
+        //     {
+        //         u_turn_direction_ = std::get<1>(u_turn_res);
+        //         current_element_point = std::get<2>(u_turn_res);
+        //     }
 
-        }
+        // }
     }
-
 
 }
 

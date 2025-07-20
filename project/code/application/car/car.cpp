@@ -56,11 +56,11 @@ void Car::update_pit5ms()
 void Car::update_pit10ms()
 {
     update_multicore();
-    if (motion_planner.update_count != vision_outputs_shared.update_count)
-    {
+    // if (motion_planner.update_count != vision_outputs_shared.update_count)
+    // {
         motion_planner.update();
         motion_planner.update_count = vision_outputs_shared.update_count;
-    }
+    // }
 
     motion_controller.update();
 }

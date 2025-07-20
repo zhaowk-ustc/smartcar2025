@@ -38,15 +38,39 @@ void MotionPlanner::update_angle()
     //     *output_target_angle_vel_ = 0;
     //     return;
     // }
+    if(miss_line == true)
+    {
+        return;
+    }
 
     // 1. 计算主前瞻曲率和3/4前瞻曲率和实际主前瞻距离
-    float lookahead = 25.0f;
-    Point2f target_point;
-    float actual_lookahead;
-    float angle_vel = 0.0f; // 曲率变化率，暂时设为0
-    std::tie(target_point, angle, angle2, actual_lookahead) = pure_pursuit(planner_local_path, lookahead);
+    if (current_element_type == ElementType::LEFT_ROUNDABOUT
+        && current_element_point.y() > 0.5 * calibrated_height
+        && current_element_point.y() < 0.9 * calibrated_height)
+    {
+        angle = -0.5f;
+    }
+    else if (current_element_type == ElementType::RIGHT_ROUNDABOUT
+        && current_element_point.y() > 0.5 * calibrated_height
+        && current_element_point.y() < 0.9 * calibrated_height)
+    {
+        angle = 0.5f;
+    }
+    else
+    {
+        Point2f target_point;
+        float actual_lookahead;
+        std::tie(target_point, angle, angle2, actual_lookahead) = pure_pursuit(planner_local_path, lookahead_distance);
 
-    vision_debug_shared.pure_pursuit_target = target_point;
+        vision_debug_shared.pure_pursuit_target = target_point;
+    }
+
+    // if (current_element_type == ElementType::CROSS
+    //     && current_element_point.y() > 0.5 * calibrated_height
+    //     && current_element_point.y() < 0.9 * calibrated_height)
+    // {
+    //     angle /= 2;
+    // }
 
     *output_target_angle_ = angle_to_servo(angle);
     *output_target_angle_vel_ = angle_to_servo(angle_vel);
@@ -56,11 +80,13 @@ void MotionPlanner::update_speed()
 {
     // 速度更新逻辑可以在这里实现
     // 目前只是简单地将目标速度设置为0.0f
-    float speed = 40;
-    float accel = 0.0f; // 假设加速度为0
 
+    const float k = 45;
+    const float max_speed = 70;
+    speed = min(max_speed, k / (abs(angle) + 0.01f));
+    speed_accel = 0.0f;
     *output_target_speed_ = speed;
-    *output_target_speed_accel_ = accel;
+    *output_target_speed_accel_ = speed_accel;
 }
 
 void MotionPlanner::connect_inputs(const TrackPath* path, const float* current_x, const float* current_y, const float* current_yaw)
