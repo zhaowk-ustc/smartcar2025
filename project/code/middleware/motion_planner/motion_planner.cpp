@@ -21,24 +21,7 @@ void MotionPlanner::update()
 
 void MotionPlanner::update_angle()
 {
-    // float angle, angle2;
-    // if (miss_line)
-    // {
-    //     if (u_turn_direction_)
-    //     {
-    //         // 右侧回弯
-    //         angle = 1.0f; // 右侧打角到最大
-    //     }
-    //     else
-    //     {
-    //         // 左侧回弯
-    //         angle = -1.0f; // 左侧打角到最大
-    //     }
-    //     *output_target_angle_ = angle_to_servo(angle);
-    //     *output_target_angle_vel_ = 0;
-    //     return;
-    // }
-    if(miss_line == true)
+    if (miss_line == true)
     {
         return;
     }
@@ -54,23 +37,33 @@ void MotionPlanner::update_angle()
         && current_element_point.y() > 0.5 * calibrated_height
         && current_element_point.y() < 0.9 * calibrated_height)
     {
-        angle = 0.5f;
+        angle = 0.3f;
     }
     else
     {
-        Point2f target_point;
-        float actual_lookahead;
-        std::tie(target_point, angle, angle2, actual_lookahead) = pure_pursuit(planner_local_path, lookahead_distance);
+        if (roundabout_remain_time > 0)
+        {
+            switch (roundabout_direction_)
+            {
+                case false:
+                    angle = -0.5f;
+                    break;
+                case true:
+                    angle = 0.3f;
+                    break;
+                default:
+                    break;
+            }
+        }
+        else
+        {
+            Point2f target_point;
+            float actual_lookahead;
+            std::tie(target_point, angle, angle2, actual_lookahead) = pure_pursuit(planner_local_path, lookahead_distance);
 
-        vision_debug_shared.pure_pursuit_target = target_point;
+            vision_debug_shared.pure_pursuit_target = target_point;
+        }
     }
-
-    // if (current_element_type == ElementType::CROSS
-    //     && current_element_point.y() > 0.5 * calibrated_height
-    //     && current_element_point.y() < 0.9 * calibrated_height)
-    // {
-    //     angle /= 2;
-    // }
 
     *output_target_angle_ = angle_to_servo(angle);
     *output_target_angle_vel_ = angle_to_servo(angle_vel);

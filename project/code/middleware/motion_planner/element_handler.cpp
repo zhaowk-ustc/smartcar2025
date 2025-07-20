@@ -32,80 +32,44 @@ void MotionPlanner::update_element()
         static ElementType last_detected_type = ElementType::NORMAL;
         static int detected_count = 0;
         const int DETECT_THRESHOLD = 5; // 连续检测阈值，可调整
-        // if (first_element_idx != -1)
+
+        if (first_element_type == last_detected_type)
         {
-            if (first_element_type == last_detected_type)
-            {
-                detected_count++;
-            }
-            else
-            {
-                detected_count = 1;
-                last_detected_type = first_element_type;
-            }
-            if (detected_count >= DETECT_THRESHOLD)
-            {
-                current_element_point = planner_local_path[first_element_idx].pos;
-                current_element_type = first_element_type;
-            }
+            detected_count++;
         }
-        // else
-        // {
-        //     detected_count = 0;
-        //     last_detected_type = ElementType::NORMAL;
-        // }
-
-
-        // 检测u型转弯
-        // if (current_element_type != ElementType::NORMAL)
-        // {
-        //     auto u_turn_res = detect_u_turn(planner_local_path);
-        //     auto is_u_turn = std::get<0>(u_turn_res);
-        //     if (is_u_turn)
-        //     {
-        //         u_turn_direction_ = std::get<1>(u_turn_res);
-        //         current_element_point = std::get<2>(u_turn_res);
-        //     }
-
-        // }
-    }
-
-}
-
-constexpr float U_TURN_DETECT_THRESHOLD = calibrated_height * 0.2f; // U型转弯的y阈值
-std::tuple<bool, bool, Point2f> MotionPlanner::detect_u_turn(const TrackPath& path)
-{
-    if (path.size() < 2)
-        return std::make_tuple(false, false, Point2f());
-    Point2f start = path.start();
-    Point2f end = path.end();
-
-    // 1. 找到下降最大段的起点
-    float max_fall = 0.0f;
-    size_t max_fall_idx = 0;
-    for (size_t i = 0; i + 1 < path.size(); ++i)
-    {
-        float fall = path[i].pos.y() - path[i + 1].pos.y();
-        if (fall > max_fall)
+        else
         {
-            max_fall = fall;
-            max_fall_idx = i;
+            detected_count = 1;
+            last_detected_type = first_element_type;
+        }
+        if (detected_count >= DETECT_THRESHOLD)
+        {
+            current_element_point = planner_local_path[first_element_idx].pos;
+            current_element_type = first_element_type;
         }
     }
 
-    bool is_u_turn = false;
-    bool u_turn_direction_ = false; // 回弯的方向，false表示左
-    // 2. 若终点y比起点y大且差值超过阈值，则判定U型转弯
-    float fall_value = end.y() - start.y();
-    if (fall_value > U_TURN_DETECT_THRESHOLD)
+    switch (current_element_type)
     {
-        is_u_turn = true;
-        u_turn_direction_ = (end.x() > start.x()); // x方向判断U型转弯方向
+        case ElementType::LEFT_ROUNDABOUT:
+            if (current_element_point.y() > 0.5 * calibrated_height && current_element_point.y() < 0.9 * calibrated_height)
+            {
+                roundabout_remain_time = 50;
+                roundabout_direction_ = false; // 左侧环岛
+            }
+            break;
+        case ElementType::RIGHT_ROUNDABOUT:
+            if (current_element_point.y() > 0.5 * calibrated_height && current_element_point.y() < 0.9 * calibrated_height)
+            {
+                roundabout_remain_time = 50;
+                roundabout_direction_ = true; // 右侧环岛
+            }
+            break;
+        default:
+            break;
     }
-    else
+    if (roundabout_remain_time > 0)
     {
-        is_u_turn = false;
+        roundabout_remain_time -= 1;
     }
-    // 返回下降最大段的起点
-    return std::make_tuple(is_u_turn, u_turn_direction_, path[max_fall_idx].pos);
 }

@@ -32,17 +32,13 @@ private:
 
     bool miss_line = false; // 是否偏离路径
 
-    static std::tuple<bool, bool, Point2f> detect_u_turn(const TrackPath& path);
     ElementType current_element_type = ElementType::NORMAL; // 当前元素类型
     Point2f current_element_point; // 当前元素的关键点
     Point2f current_element_target_dir; // 当前元素的目标方向
 
-    bool u_turn_direction_ = false; // U型转弯方向，false表示左侧，true表示右侧
-
-    bool in_roundabout_ = false; // 是否在环岛
+    // bool in_roundabout_ = false; // 是否在环岛
     bool roundabout_direction_ = false; // 环岛行驶方向，false表示左转，true表示右转
-
-
+    int roundabout_remain_time = 0;
 
 
     void update_angle();
