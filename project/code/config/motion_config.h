@@ -15,12 +15,6 @@ constexpr PID::Params speed_pid_params = {
     .kd2 = 0.0f
 };
 
-constexpr MotionPlanner::Config motion_planner_config = {
-    .max_speed = 1.0f,
-    .max_speed_accel = 0.5f,
-    .max_curvature = 1.0f,
-    .max_curvature_rate = 0.5f
-};
 
 constexpr Motor::config left_motor_config = {
     .pwm_channel = TCPWM_CH30_P10_2,

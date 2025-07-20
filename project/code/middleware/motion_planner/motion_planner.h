@@ -9,16 +9,7 @@
 class MotionPlanner :public Module, public IDebuggable
 {
 public:
-    struct Config
-    {
-        float max_speed;
-        float max_speed_accel;
-        float max_curvature;
-        float max_curvature_rate;
-        // 可扩展更多参数
-    };
-
-    MotionPlanner(const Config& config);
+    MotionPlanner() = default;
 
     void init();
     void reset();
@@ -35,7 +26,7 @@ private:
     const float* input_current_y_ = nullptr;
     const float* input_current_yaw_ = nullptr;
     TrackPath planner_local_path;
-    TrackPath planner_global_path;
+    TrackPath planner_global_path_tmp;
 
     void update_element();
 

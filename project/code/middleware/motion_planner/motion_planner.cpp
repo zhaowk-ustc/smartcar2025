@@ -2,10 +2,6 @@
 #include "multicore/core_shared.h"
 #include <algorithm>
 
-MotionPlanner::MotionPlanner(const Config& config)
-{
-}
-
 void MotionPlanner::init()
 {
 }
@@ -26,35 +22,29 @@ void MotionPlanner::update()
 void MotionPlanner::update_angle()
 {
     // float angle, angle2;
-    if (miss_line)
-    {
-        if (u_turn_direction_)
-        {
-            // 右侧回弯
-            angle = 1.0f; // 右侧打角到最大
-        }
-        else
-        {
-            // 左侧回弯
-            angle = -1.0f; // 左侧打角到最大
-        }
-        *output_target_angle_ = angle_to_servo(angle);
-        *output_target_angle_vel_ = 0;
-        return;
-    }
+    // if (miss_line)
+    // {
+    //     if (u_turn_direction_)
+    //     {
+    //         // 右侧回弯
+    //         angle = 1.0f; // 右侧打角到最大
+    //     }
+    //     else
+    //     {
+    //         // 左侧回弯
+    //         angle = -1.0f; // 左侧打角到最大
+    //     }
+    //     *output_target_angle_ = angle_to_servo(angle);
+    //     *output_target_angle_vel_ = 0;
+    //     return;
+    // }
 
     // 1. 计算主前瞻曲率和3/4前瞻曲率和实际主前瞻距离
-    float lookahead = 20.0f;
+    float lookahead = 25.0f;
     Point2f target_point;
     float actual_lookahead;
     float angle_vel = 0.0f; // 曲率变化率，暂时设为0
     std::tie(target_point, angle, angle2, actual_lookahead) = pure_pursuit(planner_local_path, lookahead);
-
-    // 2. 计算曲率变化率（曲率对时间的导数，简单差分）
-    // static float last_curvature = 0.0f;
-    // float dt = 0.01f; // 控制周期，单位：秒（请根据实际情况调整）
-    // float curvature_rate = (curvature - last_curvature) / dt;
-    // last_curvature = curvature;
 
     vision_debug_shared.pure_pursuit_target = target_point;
 
@@ -66,7 +56,7 @@ void MotionPlanner::update_speed()
 {
     // 速度更新逻辑可以在这里实现
     // 目前只是简单地将目标速度设置为0.0f
-    float speed = 30;
+    float speed = 40;
     float accel = 0.0f; // 假设加速度为0
 
     *output_target_speed_ = speed;

@@ -25,6 +25,8 @@ struct VisionOutputsShared
 {
     TrackPath track_path;
 
+    bool miss_line = false;
+
     int update_count;
 };
 

@@ -41,15 +41,19 @@ void MotionPlanner::update_element()
         {
             auto u_turn_res = detect_u_turn(planner_local_path);
             auto is_u_turn = std::get<0>(u_turn_res);
-            u_turn_direction_ = std::get<1>(u_turn_res);
-            current_element_point = std::get<2>(u_turn_res);
+            if (is_u_turn)
+            {
+                u_turn_direction_ = std::get<1>(u_turn_res);
+                current_element_point = std::get<2>(u_turn_res);
+            }
+
         }
     }
 
 
 }
 
-constexpr float U_TURN_DETECT_THRESHOLD = calibrated_height * 0.25f; // U型转弯的y阈值
+constexpr float U_TURN_DETECT_THRESHOLD = calibrated_height * 0.2f; // U型转弯的y阈值
 std::tuple<bool, bool, Point2f> MotionPlanner::detect_u_turn(const TrackPath& path)
 {
     if (path.size() < 2)

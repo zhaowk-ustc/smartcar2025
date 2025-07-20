@@ -3,5 +3,4 @@
 
 Car::Config car_config = {
     .motion_controller_config = motion_controller_config,
-    .motion_planner_config = motion_planner_config
 };

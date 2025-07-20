@@ -389,6 +389,7 @@ void UI::draw_path_overlay(const TrackPath& path)
             break;
         case ElementType::RIGHT_ROUNDABOUT:
             screen_show_string(camera_display_x_, calibrated_height, "Right Roundabout", 10);
+            break;
         case ElementType::CROSS:
             screen_show_string(camera_display_x_, calibrated_height, "Cross", 10);
             break;

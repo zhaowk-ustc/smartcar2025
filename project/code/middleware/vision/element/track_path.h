@@ -32,22 +32,23 @@ public:
         nodes[node_count++] = node;
         return node_count - 1;
     }
-    float total_length;
+
 
     const Point2f& start() const
     {
         if (node_count > 0)
             return nodes[0].pos;
-        static Point2f empty_point(0,0);
+        static Point2f empty_point(0, 0);
         return empty_point; // 返回一个空点
     }
     const Point2f& end() const
     {
         if (node_count > 0)
             return nodes[node_count - 1].pos;
-        static Point2f empty_point(0,0);
+        static Point2f empty_point(0, 0);
         return empty_point; // 返回一个空点
     }
+    float total_length;
 private:
 
     size_t node_count;

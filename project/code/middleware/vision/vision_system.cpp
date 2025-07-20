@@ -33,7 +33,19 @@ void VisionSystem::update()
 
     image_calibration(calibrated_image, mt9v03x_image[0]);
 
-    image_binarization_with_mask(calibrated_image, calibrated_binary_image, calibration_mask, calibrated_size);
+    static uint8 threshold;
+    static int miss_line_count = 0;
+    if (vision_outputs_shared.miss_line == false)
+    {
+        threshold = advanced_otsu_threshold_with_mask(calibrated_image, calibration_mask, calibrated_size);
+    }
+    else
+    {
+        miss_line_count++;
+    }
+
+    apply_binarization_with_mask(calibrated_image, calibrated_binary_image, calibration_mask, calibrated_size, threshold);
+    // image_binarization_with_mask(calibrated_image, calibrated_binary_image, calibration_mask, calibrated_size);
 
     static LineTrackingGraph vision_static_graph;
     create_line_tracking_graph(
@@ -65,6 +77,15 @@ void VisionSystem::update()
     vision_static_track_path.clear();
 
     extract_path(vision_static_graph, vision_static_track_path);
+
+    if (vision_static_track_path.length() < 8.0f)
+    {
+        vision_outputs_shared.miss_line = true;
+    }
+    else
+    {
+        vision_outputs_shared.miss_line = false;
+    }
 
     vision_outputs_shared.update_count++;
 

@@ -4,7 +4,6 @@
 
 Car::Car(const Car::Config& config)
     : motion_controller(config.motion_controller_config)
-    , motion_planner(config.motion_planner_config)
 {
     motion_controller.connect_inputs(
         &target_speed,

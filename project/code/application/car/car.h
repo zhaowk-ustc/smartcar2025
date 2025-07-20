@@ -16,7 +16,6 @@ public:
     struct Config
     {
         MotionController::Config motion_controller_config;
-        MotionPlanner::Config motion_planner_config;
     };
 
     Car(const Config& config);

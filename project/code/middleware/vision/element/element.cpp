@@ -52,13 +52,25 @@ pair<ElementType, int> detect_branch_element(const Point2f& in_vec, const vector
                     type = ElementType::RIGHT_ROUNDABOUT;
                 else
                     type = ElementType::LEFT_ROUNDABOUT;
-                // 找到cos第二大的方向
-                std::vector<std::pair<float, int>> cos_with_idx;
+                // 左环岛选择与+30度更接近的方向，右环岛选择与-30度更接近的方向
+                // 目标方向向量（单位向量），直接用30度sin、cos
+                float cos30 = 0.8660254f;
+                float sin30 = 0.5f;
+                complex<float> target_dir = (type == ElementType::LEFT_ROUNDABOUT)
+                    ? complex<float>(cos30, sin30)
+                    : complex<float>(cos30, -sin30);
+                float max_dot = -2.0f;
+                int best_idx = 0;
                 for (int i = 0; i < out_dirs.size(); ++i)
-                    cos_with_idx.emplace_back(out_dirs[i].real(), i);
-                std::sort(cos_with_idx.begin(), cos_with_idx.end(),
-                    [](const std::pair<float, int>& a, const std::pair<float, int>& b) { return a.first > b.first; });
-                out_idx = cos_with_idx.size() > 1 ? cos_with_idx[1].second : 0;
+                {
+                    float dot = out_dirs[i].real() * target_dir.real() + out_dirs[i].imag() * target_dir.imag();
+                    if (dot > max_dot)
+                    {
+                        max_dot = dot;
+                        best_idx = i;
+                    }
+                }
+                out_idx = best_idx;
             }
             else
             {
