@@ -326,6 +326,11 @@ void UI::draw_path_overlay(const TrackPath& path)
         auto node_pt = node.pos;
         uint16_t screen_x = camera_display_x_ + static_cast<int>(node_pt.x());
         uint16_t screen_y = static_cast<int>(node_pt.y());
+        if (screen_x >= ips114_width_max ||
+            screen_y >= ips114_height_max)
+        {
+            continue; // 如果超出屏幕范围则跳过
+        }
         uint16_t color = color_normal; // 默认颜色为白色
         uint16_t node_radius = 3; // 节点半径
         switch (node.element)
@@ -361,6 +366,12 @@ void UI::draw_path_overlay(const TrackPath& path)
         {
             uint16_t next_x = screen_x + static_cast<int>(node.next_dir.x() * node.next_length);
             uint16_t next_y = screen_y + static_cast<int>(node.next_dir.y() * node.next_length);
+            if (next_x >= ips114_width_max ||
+                next_y >= ips114_height_max)
+            {
+                continue; // 如果超出屏幕范围则跳过
+            }
+
             ips114_draw_line(screen_x, screen_y, next_x, next_y, color);
         }
     }

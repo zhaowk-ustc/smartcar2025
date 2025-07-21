@@ -1,6 +1,41 @@
 #include "motion_planner.h"
 #include "multicore/core_shared.h"
 
+void MotionPlanner::fix_path()
+{
+    // 修正路径，确保转角不大于120度，如果大于120度改成直线
+    if (planner_local_path.size() < 3) return;
+    const float cos_threshold = -0.5f; // cos(120°)
+    const float extend_length = 60.0f; // 射线长度，可根据需求调整
+    for (size_t i = 1; i + 1 < planner_local_path.size(); ++i)
+    {
+        auto& prev = planner_local_path[i - 1].pos;
+        auto& curr = planner_local_path[i].pos;
+        auto& next = planner_local_path[i + 1].pos;
+        auto v1 = curr - prev;
+        auto v2 = next - curr;
+        float len1 = std::abs(v1);
+        float len2 = std::abs(v2);
+        if (len1 < 1e-3f || len2 < 1e-3f) continue;
+        float cos_theta = (v1.real() * v2.real() + v1.imag() * v2.imag()) / (len1 * len2);
+        if (cos_theta < cos_threshold)
+        {
+            // 计算射线终点
+            auto dir = v1 / len1;
+            next = curr + dir * extend_length;
+            // 截断路径
+            planner_local_path.nodes[i + 1].element = ElementType::NORMAL;
+            planner_local_path.nodes[i + 1].next_dir = dir;
+            planner_local_path.nodes[i + 1].next_length = extend_length;
+            planner_local_path.clear();
+            for (size_t j = 0; j <= i + 1; ++j)
+            {
+                planner_local_path.add_node(planner_local_path.nodes[j]);
+            }
+            break;
+        }
+    }
+}
 
 void MotionPlanner::update_element()
 {
@@ -49,19 +84,20 @@ void MotionPlanner::update_element()
         }
     }
 
+    int max_roundabout_remain_time = 30;
     switch (current_element_type)
     {
         case ElementType::LEFT_ROUNDABOUT:
-            if (current_element_point.y() > 0.5 * calibrated_height && current_element_point.y() < 0.9 * calibrated_height)
+            if (current_element_point.y() > 0.6 * calibrated_height && current_element_point.y() < 0.9 * calibrated_height)
             {
-                roundabout_remain_time = 50;
+                roundabout_remain_time = max_roundabout_remain_time;
                 roundabout_direction_ = false; // 左侧环岛
             }
             break;
         case ElementType::RIGHT_ROUNDABOUT:
-            if (current_element_point.y() > 0.5 * calibrated_height && current_element_point.y() < 0.9 * calibrated_height)
+            if (current_element_point.y() > 0.6 * calibrated_height && current_element_point.y() < 0.9 * calibrated_height)
             {
-                roundabout_remain_time = 50;
+                roundabout_remain_time = max_roundabout_remain_time;
                 roundabout_direction_ = true; // 右侧环岛
             }
             break;

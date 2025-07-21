@@ -34,7 +34,7 @@ void VisionSystem::update()
     image_calibration(calibrated_image, mt9v03x_image[0]);
 
     static uint8 threshold;
-    static int miss_line_count = 0;
+    // static int miss_line_count = 0;
     // if (vision_outputs_shared.miss_line == false)
     {
         threshold = advanced_otsu_threshold_with_mask(calibrated_image, calibration_mask, calibrated_size);

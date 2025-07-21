@@ -26,8 +26,9 @@ private:
     const float* input_current_y_ = nullptr;
     const float* input_current_yaw_ = nullptr;
     TrackPath planner_local_path;
-    TrackPath planner_global_path_tmp;
+    // TrackPath planner_global_path_tmp;
 
+    void fix_path();
     void update_element();
 
     bool miss_line = false; // 是否偏离路径
@@ -36,13 +37,13 @@ private:
     Point2f current_element_point; // 当前元素的关键点
     Point2f current_element_target_dir; // 当前元素的目标方向
 
-    // bool in_roundabout_ = false; // 是否在环岛
+    bool in_roundabout_ = false; // 是否在环岛
     bool roundabout_direction_ = false; // 环岛行驶方向，false表示左转，true表示右转
     int roundabout_remain_time = 0;
 
 
     void update_angle();
-    float lookahead_distance = 25.0f; // 前瞻距离
+    float lookahead_distance = 30.0f; // 前瞻距离
     float angle = 0.0f; // 主前瞻曲率
     float angle2 = 0.0f; // 3/4前瞻
     float angle_vel = 0.0f;
@@ -58,7 +59,7 @@ private:
     {
         // 左负右正
         // 把角度映射到(-1, 1)范围内
-        return angle;
+        return angle + angle * abs(angle) * 0.5;
     }
 
 

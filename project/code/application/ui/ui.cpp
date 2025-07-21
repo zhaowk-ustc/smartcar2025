@@ -31,7 +31,7 @@ void UI::update_pit()
     update_key_state();
 }
 
-void UI::import_vars(const vector<const DebugVar *> &var_ptrs)
+void UI::import_vars(const vector<const DebugVar*>& var_ptrs)
 {
     var_ptrs_ = var_ptrs;
     total_vars_ = var_ptrs_.size();
@@ -51,5 +51,5 @@ void UI::disable()
 void UI::setup_debug_vars()
 {
     add_debug_var("switch_camera", make_function_var("switch_camera", [this]
-                                                     { select_camera_display_mode(); }));
+        { select_camera_display_mode(); }));
 }

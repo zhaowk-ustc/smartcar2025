@@ -9,8 +9,8 @@
 #include "middleware/motion_planner/motion_planner.h"
 
 constexpr PID::Params speed_pid_params = {
-    .kp = 4.0f,
-    .ki = 0.5f,
+    .kp = 5.0f,
+    .ki = 0.3f,
     .kd = 0.05f,
     .kd2 = 0.0f
 };

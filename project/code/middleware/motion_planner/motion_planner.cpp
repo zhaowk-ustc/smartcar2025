@@ -14,6 +14,7 @@ void MotionPlanner::update()
 {
     planner_local_path = *input_path_;
 
+    fix_path();
     update_element();
     update_angle();
     update_speed();
@@ -27,29 +28,29 @@ void MotionPlanner::update_angle()
     }
 
     // 1. 计算主前瞻曲率和3/4前瞻曲率和实际主前瞻距离
-    if (current_element_type == ElementType::LEFT_ROUNDABOUT
-        && current_element_point.y() > 0.5 * calibrated_height
-        && current_element_point.y() < 0.9 * calibrated_height)
+    // if (current_element_type == ElementType::LEFT_ROUNDABOUT
+    //     && current_element_point.y() > 0.6 * calibrated_height
+    //     && current_element_point.y() < 0.9 * calibrated_height)
+    // {
+    //     angle = -0.5f;
+    // }
+    // else if (current_element_type == ElementType::RIGHT_ROUNDABOUT
+    //     && current_element_point.y() > 0.6 * calibrated_height
+    //     && current_element_point.y() < 0.9 * calibrated_height)
+    // {
+    //     angle = 0.3f;
+    // }
+    // else
     {
-        angle = -0.5f;
-    }
-    else if (current_element_type == ElementType::RIGHT_ROUNDABOUT
-        && current_element_point.y() > 0.5 * calibrated_height
-        && current_element_point.y() < 0.9 * calibrated_height)
-    {
-        angle = 0.3f;
-    }
-    else
-    {
-        if (roundabout_remain_time > 0)
+        if (roundabout_remain_time > 0 && roundabout_remain_time < 50)
         {
             switch (roundabout_direction_)
             {
                 case false:
-                    angle = -0.5f;
+                    angle = -0.4f;
                     break;
                 case true:
-                    angle = 0.3f;
+                    angle = 0.2f;
                     break;
                 default:
                     break;
@@ -74,8 +75,8 @@ void MotionPlanner::update_speed()
     // 速度更新逻辑可以在这里实现
     // 目前只是简单地将目标速度设置为0.0f
 
-    const float k = 45;
-    const float max_speed = 70;
+    const float max_speed = 120;
+    const float k = max_speed * 0.7f;
     speed = min(max_speed, k / (abs(angle) + 0.01f));
     speed_accel = 0.0f;
     *output_target_speed_ = speed;
@@ -141,13 +142,15 @@ std::tuple<Point2f, float, float, float> MotionPlanner::pure_pursuit(const Track
     if (actual_lookahead < 0.5f * lookahead)
         actual_lookahead = 0.5f * lookahead;
     float x_r = target.x() - pos.x();
+    float y_r = pos.y() - target.y();
     float curvature = actual_lookahead > 1e-6f ? x_r / (actual_lookahead) : 0;
 
     // 3/4前瞻点，使用主前瞻点实际距离的3/4
     float actual_lookahead2 = 0.0f;
     Point2f target2 = interpolate_path_point(path, 0.75f * actual_lookahead, actual_lookahead2);
     float x_r2 = target2.x() - pos.x();
-    float curvature2 = x_r2 / (actual_lookahead2 > 1e-6f ? actual_lookahead2 : 1.0f);
+    float y_r2 = pos.y() - target2.y();
+    float curvature2 = actual_lookahead2 > 1e-6f ? x_r2 / (actual_lookahead2) : 0;
 
     return std::tuple<Point2f, float, float, float>(target, curvature, curvature2, actual_lookahead);
 }
