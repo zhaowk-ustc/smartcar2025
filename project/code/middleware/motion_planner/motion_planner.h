@@ -43,7 +43,7 @@ private:
 
 
     void update_angle();
-    float lookahead_distance = 30.0f; // 前瞻距离
+    float lookahead_distance = 25.0f; // 前瞻距离
     float angle = 0.0f; // 主前瞻曲率
     float angle2 = 0.0f; // 3/4前瞻
     float angle_vel = 0.0f;

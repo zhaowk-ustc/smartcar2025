@@ -60,7 +60,8 @@ void MotionPlanner::update_angle()
         {
             Point2f target_point;
             float actual_lookahead;
-            std::tie(target_point, angle, angle2, actual_lookahead) = pure_pursuit(planner_local_path, lookahead_distance);
+            std::tie(target_point, angle, angle2, actual_lookahead) =
+                pure_pursuit(planner_local_path, lookahead_distance);
 
             vision_debug_shared.pure_pursuit_target = target_point;
         }
