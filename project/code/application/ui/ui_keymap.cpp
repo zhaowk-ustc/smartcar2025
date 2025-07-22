@@ -41,17 +41,18 @@ void UI::update_key_state()
 {
     // 读取当前按键状态并更新 current_key_
     auto key = get_key_input();
-    
-    if (key != Key::NONE and key != pre_key_)
+
+    // 仅在按键松开（从有效按键变为NONE）时触发
+    if (pre_key_ != Key::NONE && key == Key::NONE)
     {
-        current_key_ = key;
+        current_key_ = pre_key_;
     }
     else
     {
         current_key_ = Key::NONE;
     }
-
     pre_key_ = key;
+
 }
 
 void UI::handle_current_key()
@@ -59,23 +60,23 @@ void UI::handle_current_key()
     // 根据 current_key_ 调用相应的处理函数
     switch (current_key_)
     {
-    case Key::UP:
-        on_key_up();
-        break;
-    case Key::DOWN:
-        on_key_down();
-        break;
-    case Key::LEFT:
-        on_key_left();
-        break;
-    case Key::RIGHT:
-        on_key_right();
-        break;
-    case Key::ENTER:
-        on_key_enter();
-        break;
-    default:
-        break;
+        case Key::UP:
+            on_key_up();
+            break;
+        case Key::DOWN:
+            on_key_down();
+            break;
+        case Key::LEFT:
+            on_key_left();
+            break;
+        case Key::RIGHT:
+            on_key_right();
+            break;
+        case Key::ENTER:
+            on_key_enter();
+            break;
+        default:
+            break;
     }
 
     current_key_ = Key::NONE; // 处理完后重置按键状态
@@ -83,18 +84,22 @@ void UI::handle_current_key()
 
 void UI::on_key_up()
 {
-    if (edit_mode_) {
+    if (edit_mode_)
+    {
         // 在编辑模式下，上键增加变量值
         const DebugVar* current_var = var_ptrs_[current_var_index_];
         // 如果变量有递增函数，则调用它
-        if (current_var->increment) {
+        if (current_var->increment)
+        {
             current_var->increment();
         }
-        screen_show_string(menu_display_x_ + 12 * 8, 
-                          (current_var_index_ % vars_per_page_) * 16, 
-                          "[" + current_var->get() + "]", 
-                          5);
-    } else {
+        // screen_show_string(menu_display_x_ + 12 * 8,
+        //     (current_var_index_ % vars_per_page_) * 16,
+        //     "[" + current_var->get() + "]",
+        //     5);
+    }
+    else
+    {
         // 在显示模式下，上键移动光标
         prev_item();
     }
@@ -102,17 +107,21 @@ void UI::on_key_up()
 
 void UI::on_key_down()
 {
-    if (edit_mode_) {
+    if (edit_mode_)
+    {
         // 在编辑模式下，下键减少变量值
         const DebugVar* current_var = var_ptrs_[current_var_index_];
-        if (current_var->decrement) {
+        if (current_var->decrement)
+        {
             current_var->decrement();
         }
-        screen_show_string(menu_display_x_ + 12 * 8, 
-                          (current_var_index_ % vars_per_page_) * 16, 
-                          "[" + current_var->get() + "]", 
-                          5);
-    } else {
+        // screen_show_string(menu_display_x_ + 12 * 8,
+        //     (current_var_index_ % vars_per_page_) * 16,
+        //     "[" + current_var->get() + "]",
+        //     5);
+    }
+    else
+    {
         // 在显示模式下，下键移动光标
         next_item();
     }
@@ -130,14 +139,28 @@ void UI::on_key_right()
 
 void UI::on_key_enter()
 {
-    if (!edit_mode_) {
-        // 在显示模式下按Enter切换模式
-        change_mod();
-    } else {
-        // 在编辑模式下按Enter确认修改
-        const DebugVar* current_var = var_ptrs_[current_var_index_];
-        // 这里可以添加变量值修改的逻辑
-        // 例如：current_var->set(new_value);
+    const DebugVar* current_var = var_ptrs_[current_var_index_];
+    if (!edit_mode_)
+    {
+        if (current_var->is_function)
+        {
+            // 如果当前变量是函数类型，直接调用它
+            current_var->setter("");
+        }
+        else
+        {
+            if (current_var->read_only)
+            {
+                // 如果是只读变量，直接返回
+                return;
+            }
+            // 在显示模式下按Enter切换到编辑模式
+            change_mod();
+        }
+
+    }
+    else
+    {
         change_mod();  // 切换回显示模式
     }
 }

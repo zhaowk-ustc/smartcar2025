@@ -113,12 +113,12 @@ void MotionController::setup_debug_vars()
 {
     speed_pid_.export_debug_vars(this, "pid_s.");
     add_debug_var("lenc", make_readonly_var("lenc", &left_encoder_count_));
-    add_debug_var("renc", make_readonly_var("renc", &right_encoder_count_));
-    add_debug_var("spd", make_readonly_var("spd", &average_encoder_count));
+    // add_debug_var("renc", make_readonly_var("renc", &right_encoder_count_));
+    // add_debug_var("spd", make_readonly_var("spd", &average_encoder_count));
     // add_debug_var("lpwm", make_readonly_var("lpwm", &left_motor_duty_));
     // add_debug_var("rpwm", make_readonly_var("rpwm", &right_motor_duty_));
     // add_debug_var("servodir", make_debug_var("servodir", &servo_dir_));
-    add_debug_var("global_x", make_readonly_var("global_x", &global_x));
-    add_debug_var("global_y", make_readonly_var("global_y", &global_y));
-    add_debug_var("global_yaw", make_readonly_var("global_yaw", &global_yaw_));
+    // add_debug_var("global_x", make_readonly_var("global_x", &global_x));
+    // add_debug_var("global_y", make_readonly_var("global_y", &global_y));
+    // add_debug_var("global_yaw", make_readonly_var("global_yaw", &global_yaw_));
 }

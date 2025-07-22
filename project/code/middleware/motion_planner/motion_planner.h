@@ -9,7 +9,7 @@
 class MotionPlanner :public Module, public IDebuggable
 {
 public:
-    MotionPlanner() = default;
+    MotionPlanner();
 
     void init();
     void reset();
@@ -39,8 +39,10 @@ private:
 
     bool in_roundabout_ = false; // 是否在环岛
     bool roundabout_direction_ = false; // 环岛行驶方向，false表示左转，true表示右转
-    int max_roundabout_remain_time = 50;
+    int max_roundabout_remain_time = 40;
     int roundabout_remain_time = 0;
+    float left_round_dir = -0.6f;
+    float right_round_dir = 0.45f;
 
 
     void update_angle();
@@ -50,7 +52,8 @@ private:
     float actual_lookahead, actual_lookahead2;
     float angle_vel = 0.0f;
 
-    float max_speed = 120;
+
+    int max_speed = 140;
     float speed = 0.0f; // 目标速度
     float speed_accel = 0.0f; // 目标速度加速度
 
@@ -62,29 +65,18 @@ private:
     {
         // 左负右正
         // 把角度映射到(-1, 1)范围内
-        return angle + angle * abs(angle) * 0.5;
+        return angle + angle * abs(angle) * 0.4;
     }
 
 
     void update_speed();
-
-
-
-    // float get_lookahead_distance(float speed) const
-    // {
-    //     // 根据目标速度计算前瞻距离
-    //     // 这里可以根据实际需求调整前瞻距离的计算方式
-    //     return 0.5f + speed * 0.01f;
-    // }
 
     float* output_target_speed_; // 目标速度
     float* output_target_speed_accel_; // 目标速度加速度
     float* output_target_angle_; // 目标曲率
     float* output_target_angle_vel_;
 
-    void path_local_to_global(TrackPath& global_path, const TrackPath& local_path);
-    void path_global_to_local(TrackPath& local_path, const TrackPath& global_path);
-
+    void setup_debug_vars() override;
 };
 
 #endif // MOTION_PLANNER_H

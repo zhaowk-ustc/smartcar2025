@@ -75,13 +75,14 @@ void Car::update_pit20ms()
 void Car::setup_debug_vars()
 {
     motion_controller.export_debug_vars(&debugger, "");
+    motion_planner.export_debug_vars(&debugger, "");
     ui.export_debug_vars(&debugger, "");
 
     // 添加调试变量
     add_debug_var("target_speed", make_debug_var("target_speed", &target_speed));
-    add_debug_var("target_speed_accel", make_debug_var("target_speed_accel", &target_speed_accel));
-    add_debug_var("target_direction", make_debug_var("target_direction", &target_direction));
-    add_debug_var("target_direction_accel", make_debug_var("target_direction_accel", &target_direction_accel));
+    // add_debug_var("target_speed_accel", make_debug_var("target_speed_accel", &target_speed_accel));
+    add_debug_var("target_direction", make_readonly_var("target_direction", &target_direction));
+    // add_debug_var("target_direction_accel", make_debug_var("target_direction_accel", &target_direction_accel));
 
     // 导出到 Debugger
     export_debug_vars(&debugger, "");

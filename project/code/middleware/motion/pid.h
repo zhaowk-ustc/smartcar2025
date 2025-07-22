@@ -120,7 +120,7 @@ private:
         add_debug_var("kp", make_debug_var("kp", &kp_));
         add_debug_var("ki", make_debug_var("ki", &ki_));
         add_debug_var("kd", make_debug_var("kd", &kd_));
-        add_debug_var("kd2", make_debug_var("kd2", &kd2_));
+        // add_debug_var("kd2", make_debug_var("kd2", &kd2_));
 
     }
 };

@@ -18,7 +18,7 @@ void UI::update_mainloop()
     if (!enabled_)
         return;
 
-    handle_current_key();
+
     display_menu();
     display_camera();
 }
@@ -29,6 +29,7 @@ void UI::update_pit()
         return;
 
     update_key_state();
+    handle_current_key();
 }
 
 void UI::import_vars(const vector<const DebugVar*>& var_ptrs)

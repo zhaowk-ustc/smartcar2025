@@ -2,6 +2,11 @@
 #include "multicore/core_shared.h"
 #include <algorithm>
 
+MotionPlanner::MotionPlanner()
+{
+    setup_debug_vars();
+}
+
 void MotionPlanner::init()
 {
 }
@@ -36,10 +41,10 @@ void MotionPlanner::update_angle()
         switch (roundabout_direction_)
         {
             case false:
-                angle = -0.4f;
+                angle = left_round_dir;
                 break;
             case true:
-                angle = 0.2f;
+                angle = right_round_dir;
                 break;
             default:
                 break;
@@ -65,7 +70,7 @@ void MotionPlanner::update_speed()
     // 速度更新逻辑
     // 基于曲率和角速度估算加速度
     const float k = max_speed * 0.7f;
-    speed = min(max_speed, k / (abs(angle) + 0.01f));
+    speed = min(static_cast<float>(max_speed), k / (abs(angle) + 0.01f));
 
     *output_target_speed_ = speed;
     *output_target_speed_accel_ = speed_accel;
@@ -143,56 +148,10 @@ std::tuple<Point2f, float, float> MotionPlanner::pure_pursuit(const TrackPath& p
     return std::tuple<Point2f, float, float>(target, curvature, actual_lookahead);
 }
 
-void MotionPlanner::path_local_to_global(TrackPath& global_path, const TrackPath& local_path)
+void MotionPlanner::setup_debug_vars()
 {
-    global_path = local_path;
-    // 将路径从局部坐标系转换到全局坐标系
-    if (input_current_x_ && input_current_y_ && input_current_yaw_)
-    {
-        float global_x = *input_current_x_;
-        float global_y = *input_current_y_;
-        float global_yaw = *input_current_yaw_;
-
-        float cos_yaw = cos(global_yaw);
-        float sin_yaw = sin(global_yaw);
-
-        for (size_t i = 0; i < global_path.size(); ++i)
-        {
-            Point2f& pos = global_path[i].pos;
-            float x_new = global_x + pos.x() * cos_yaw - pos.y() * sin_yaw;
-            float y_new = global_y + pos.x() * sin_yaw + pos.y() * cos_yaw;
-            pos = Point2f(x_new, y_new);
-        }
-    }
-    else
-    {
-        global_path.clear();
-    }
-}
-
-void MotionPlanner::path_global_to_local(TrackPath& local_path, const TrackPath& global_path)
-{
-    local_path = global_path;
-    // 将路径从全局坐标系转换到局部坐标系
-    if (input_current_x_ && input_current_y_ && input_current_yaw_)
-    {
-        float global_x = *input_current_x_;
-        float global_y = *input_current_y_;
-        float global_yaw = *input_current_yaw_;
-
-        float cos_yaw = cos(global_yaw);
-        float sin_yaw = sin(global_yaw);
-
-        for (size_t i = 0; i < local_path.size(); ++i)
-        {
-            Point2f& pos = local_path[i].pos;
-            float x_new = (pos.x() - global_x) * cos_yaw + (pos.y() - global_y) * sin_yaw;
-            float y_new = -(pos.x() - global_x) * sin_yaw + (pos.y() - global_y) * cos_yaw;
-            pos = Point2f(x_new, y_new);
-        }
-    }
-    else
-    {
-        local_path.clear();
-    }
+    add_debug_var("speed_base", make_debug_var("speed_base", &max_speed));
+    add_debug_var("LRoundDir", make_debug_var("LRoundDir", &left_round_dir));
+    add_debug_var("LRoundDir", make_debug_var("RRoundDir", &right_round_dir));
+    add_debug_var("RoundTime", make_debug_var("RoundTime", &max_roundabout_remain_time));
 }
