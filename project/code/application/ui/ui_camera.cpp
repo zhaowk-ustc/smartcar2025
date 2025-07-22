@@ -76,7 +76,7 @@ void UI::display_overlay()
     memcpy(&ui_display_graph, &vision_debug_shared.line_tracking_graph, sizeof(vision_debug_shared.line_tracking_graph));
     static TrackPath ui_display_path;
     memcpy(&ui_display_path, &vision_outputs_shared.track_path, sizeof(vision_outputs_shared.track_path));
-    draw_path_overlay(ui_display_path);
+    // draw_path_overlay(ui_display_path);
     // draw_graph_overlay(ui_display_graph);
 }
 

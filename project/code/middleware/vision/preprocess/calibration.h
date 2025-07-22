@@ -6,7 +6,7 @@
 constexpr uint16_t calibrated_width = 88;
 constexpr uint16_t calibrated_height = 42;
 constexpr uint16_t calibrated_size = calibrated_width * calibrated_height;
-constexpr uint16_t aligned_calibrated_size = 88 * 42;
+constexpr uint16_t aligned_calibrated_size = 88 * 48;
 
 void image_calibration(uint8_t* dest_image_data, const uint8_t* source_image_data);
 

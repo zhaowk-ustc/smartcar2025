@@ -84,18 +84,22 @@ void MotionPlanner::update_element()
         }
     }
 
-    int max_roundabout_remain_time = 30;
+
+    if (roundabout_remain_time > 0)
+    {
+        roundabout_remain_time -= 1;
+    }
     switch (current_element_type)
     {
         case ElementType::LEFT_ROUNDABOUT:
-            if (current_element_point.y() > 0.6 * calibrated_height && current_element_point.y() < 0.9 * calibrated_height)
+            if (current_element_point.y() > 0.5 * calibrated_height && current_element_point.y() < 0.9 * calibrated_height)
             {
                 roundabout_remain_time = max_roundabout_remain_time;
                 roundabout_direction_ = false; // 左侧环岛
             }
             break;
         case ElementType::RIGHT_ROUNDABOUT:
-            if (current_element_point.y() > 0.6 * calibrated_height && current_element_point.y() < 0.9 * calibrated_height)
+            if (current_element_point.y() > 0.5 * calibrated_height && current_element_point.y() < 0.9 * calibrated_height)
             {
                 roundabout_remain_time = max_roundabout_remain_time;
                 roundabout_direction_ = true; // 右侧环岛
@@ -103,9 +107,5 @@ void MotionPlanner::update_element()
             break;
         default:
             break;
-    }
-    if (roundabout_remain_time > 0)
-    {
-        roundabout_remain_time -= 1;
     }
 }

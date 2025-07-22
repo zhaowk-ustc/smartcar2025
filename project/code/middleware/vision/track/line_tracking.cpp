@@ -43,6 +43,7 @@ void create_line_tracking_graph(
         // 处理未找到白点的情况
         graph.clear();
         graph.valid = false;
+        last_seed_point = Point(image_w / 2, image_h - 1);
         return;
     }
 
@@ -109,7 +110,7 @@ void create_line_tracking_graph(
             // if (succ_idx >= 0 && succ_idx < graph.size() &&
             //     graph.getNode(succ_idx).type() != NodeType::DELETED)
             // {
-                valid_successor_count++;
+            valid_successor_count++;
             // }
         }
 

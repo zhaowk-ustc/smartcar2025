@@ -22,64 +22,51 @@ void MotionPlanner::update()
 
 void MotionPlanner::update_angle()
 {
+
     if (miss_line == true)
     {
+        *output_target_angle_vel_ = 0;
         return;
     }
-
-    // 1. 计算主前瞻曲率和3/4前瞻曲率和实际主前瞻距离
-    // if (current_element_type == ElementType::LEFT_ROUNDABOUT
-    //     && current_element_point.y() > 0.6 * calibrated_height
-    //     && current_element_point.y() < 0.9 * calibrated_height)
-    // {
-    //     angle = -0.5f;
-    // }
-    // else if (current_element_type == ElementType::RIGHT_ROUNDABOUT
-    //     && current_element_point.y() > 0.6 * calibrated_height
-    //     && current_element_point.y() < 0.9 * calibrated_height)
-    // {
-    //     angle = 0.3f;
-    // }
-    // else
+    angle_vel = 0;
+    angle = 0;
+    if (roundabout_remain_time > 0 && roundabout_remain_time < max_roundabout_remain_time)
     {
-        if (roundabout_remain_time > 0 && roundabout_remain_time < 50)
+        angle_vel = 0;
+        switch (roundabout_direction_)
         {
-            switch (roundabout_direction_)
-            {
-                case false:
-                    angle = -0.4f;
-                    break;
-                case true:
-                    angle = 0.2f;
-                    break;
-                default:
-                    break;
-            }
-        }
-        else
-        {
-            Point2f target_point;
-            float actual_lookahead;
-            std::tie(target_point, angle, angle2, actual_lookahead) =
-                pure_pursuit(planner_local_path, lookahead_distance);
-
-            vision_debug_shared.pure_pursuit_target = target_point;
+            case false:
+                angle = -0.4f;
+                break;
+            case true:
+                angle = 0.2f;
+                break;
+            default:
+                break;
         }
     }
+    else
+    {
+        Point2f target_point;
+        std::tie(target_point, angle, actual_lookahead) = pure_pursuit(planner_local_path, base_lookahead);
 
+        // 根据angle调整前瞻距离
+        // actual_lookahead = base_lookahead * (1.5f - abs(angle) / 2);
+        // tie(target_point, angle, actual_lookahead) = pure_pursuit(planner_local_path, actual_lookahead);
+        vision_debug_shared.pure_pursuit_target = target_point;
+    }
     *output_target_angle_ = angle_to_servo(angle);
     *output_target_angle_vel_ = angle_to_servo(angle_vel);
+
 }
 
 void MotionPlanner::update_speed()
 {
-    // 速度更新逻辑可以在这里实现
-    // 目前只是简单地将目标速度设置为0.0f
-
-    const float max_speed = 120;
+    // 速度更新逻辑
+    // 基于曲率和角速度估算加速度
     const float k = max_speed * 0.7f;
     speed = min(max_speed, k / (abs(angle) + 0.01f));
-    speed_accel = 0.0f;
+
     *output_target_speed_ = speed;
     *output_target_speed_accel_ = speed_accel;
 }
@@ -130,11 +117,11 @@ static Point2f interpolate_path_point(const TrackPath& path, float dist, float& 
     return target;
 }
 
-// 返回tuple<主前瞻target点, 主前瞻曲率, 3/4前瞻曲率, 实际主前瞻距离>
-std::tuple<Point2f, float, float, float> MotionPlanner::pure_pursuit(const TrackPath& path, float lookahead)
+// 返回tuple<主前瞻target点, 主前瞻曲率, 二倍前瞻曲率, 实际主前瞻距离, 实际二倍前瞻距离>
+std::tuple<Point2f, float, float> MotionPlanner::pure_pursuit(const TrackPath& path, float lookahead)
 {
     if (path.size() == 0 || path.length() < 1e-6f)
-        return std::tuple<Point2f, float, float, float>(Point2f(), 0.0f, 0.0f, 0.0f);
+        return std::tuple<Point2f, float, float>(Point2f(), 0.0f, 0.0f);
     Point2f pos(calibrated_width / 2, calibrated_height);
 
     // 主前瞻点
@@ -146,14 +133,14 @@ std::tuple<Point2f, float, float, float> MotionPlanner::pure_pursuit(const Track
     float y_r = pos.y() - target.y();
     float curvature = actual_lookahead > 1e-6f ? x_r / (actual_lookahead) : 0;
 
-    // 3/4前瞻点，使用主前瞻点实际距离的3/4
-    float actual_lookahead2 = 0.0f;
-    Point2f target2 = interpolate_path_point(path, 0.75f * actual_lookahead, actual_lookahead2);
-    float x_r2 = target2.x() - pos.x();
-    float y_r2 = pos.y() - target2.y();
-    float curvature2 = actual_lookahead2 > 1e-6f ? x_r2 / (actual_lookahead2) : 0;
+    // // 二倍前瞻点，使用主前瞻点实际距离的2倍
+    // float actual_lookahead2 = 0.0f;
+    // Point2f target2 = interpolate_path_point(path, 2.0f * actual_lookahead, actual_lookahead2);
+    // float x_r2 = target2.x() - pos.x();
+    // float y_r2 = pos.y() - target2.y();
+    // float curvature2 = actual_lookahead2 > 1e-6f ? x_r2 / (actual_lookahead2) : 0;
 
-    return std::tuple<Point2f, float, float, float>(target, curvature, curvature2, actual_lookahead);
+    return std::tuple<Point2f, float, float>(target, curvature, actual_lookahead);
 }
 
 void MotionPlanner::path_local_to_global(TrackPath& global_path, const TrackPath& local_path)
