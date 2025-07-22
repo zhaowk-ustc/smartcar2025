@@ -44,6 +44,7 @@ private:
     float target_speed_accel;
     float target_direction;
     float target_direction_accel;
+    bool last_updated = false; // 上次更新标志
 
     float global_x = 0.0f; // 全局X坐标
     float global_y = 0.0f; // 全局Y坐标

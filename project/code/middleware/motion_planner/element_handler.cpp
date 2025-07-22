@@ -18,6 +18,8 @@ void MotionPlanner::fix_path()
         float len2 = std::abs(v2);
         if (len1 < 1e-3f || len2 < 1e-3f) continue;
         float cos_theta = (v1.real() * v2.real() + v1.imag() * v2.imag()) / (len1 * len2);
+
+
         if (cos_theta < cos_threshold)
         {
             // 计算射线终点
@@ -26,6 +28,32 @@ void MotionPlanner::fix_path()
             // 截断路径
             planner_local_path.nodes[i + 1].element = ElementType::NORMAL;
             planner_local_path.nodes[i + 1].next_dir = dir;
+            planner_local_path.nodes[i + 1].next_length = extend_length;
+            planner_local_path.clear();
+            for (size_t j = 0; j <= i + 1; ++j)
+            {
+                planner_local_path.add_node(planner_local_path.nodes[j]);
+            }
+            break;
+        }
+
+        
+        // 新增：环岛保护期内检测到环岛，替换为30度射线
+        if (roundabout_protect_time > 0 && roundabout_remain_time == 0 &&
+            (planner_local_path.nodes[i + 1].element == ElementType::LEFT_ROUNDABOUT || planner_local_path.nodes[i + 1].element == ElementType::RIGHT_ROUNDABOUT))
+        {
+            // 30度常量
+            constexpr float cos30 = 0.8660254f;
+            constexpr float sin30 = 0.5f;
+            float sign = (planner_local_path.nodes[i + 1].element == ElementType::LEFT_ROUNDABOUT) ? 1.0f : -1.0f;
+            auto dir = v1 / len1;
+            // 旋转dir向量
+            float cos_a = cos30;
+            float sin_a = sign * sin30;
+            auto dir_rot = decltype(dir)(dir.real() * cos_a - dir.imag() * sin_a, dir.real() * sin_a + dir.imag() * cos_a);
+            next = curr + dir_rot * extend_length;
+            planner_local_path.nodes[i + 1].element = ElementType::NORMAL;
+            planner_local_path.nodes[i + 1].next_dir = dir_rot;
             planner_local_path.nodes[i + 1].next_length = extend_length;
             planner_local_path.clear();
             for (size_t j = 0; j <= i + 1; ++j)
@@ -89,12 +117,18 @@ void MotionPlanner::update_element()
     {
         roundabout_remain_time -= 1;
     }
+    else if (roundabout_protect_time > 0)
+    {
+        roundabout_protect_time -= 1;
+        return;
+    }
     switch (current_element_type)
     {
         case ElementType::LEFT_ROUNDABOUT:
             if (current_element_point.y() > 0.5 * calibrated_height && current_element_point.y() < 0.9 * calibrated_height)
             {
                 roundabout_remain_time = max_roundabout_remain_time;
+                roundabout_protect_time = max_roundabout_remain_time * 10; // 环岛保护时间，单位为10ms
                 roundabout_direction_ = false; // 左侧环岛
             }
             break;
@@ -102,6 +136,7 @@ void MotionPlanner::update_element()
             if (current_element_point.y() > 0.5 * calibrated_height && current_element_point.y() < 0.9 * calibrated_height)
             {
                 roundabout_remain_time = max_roundabout_remain_time;
+                roundabout_protect_time = max_roundabout_remain_time * 10;
                 roundabout_direction_ = true; // 右侧环岛
             }
             break;

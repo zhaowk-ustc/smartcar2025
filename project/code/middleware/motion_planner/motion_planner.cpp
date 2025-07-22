@@ -41,10 +41,10 @@ void MotionPlanner::update_angle()
         switch (roundabout_direction_)
         {
             case false:
-                angle = left_round_dir;
+                angle = left_round_dir/10.0f;
                 break;
             case true:
-                angle = right_round_dir;
+                angle = right_round_dir/10.0f;
                 break;
             default:
                 break;
@@ -55,9 +55,10 @@ void MotionPlanner::update_angle()
         Point2f target_point;
         std::tie(target_point, angle, actual_lookahead) = pure_pursuit(planner_local_path, base_lookahead);
 
-        // 根据angle调整前瞻距离
-        // actual_lookahead = base_lookahead * (1.5f - abs(angle) / 2);
-        // tie(target_point, angle, actual_lookahead) = pure_pursuit(planner_local_path, actual_lookahead);
+        Point2f target_point2;
+        std::tie(target_point2, angle2, actual_lookahead2) = pure_pursuit(planner_local_path, base_lookahead * 1.5f);
+
+        angle_vel = (angle2 - angle);
         vision_debug_shared.pure_pursuit_target = target_point;
     }
     *output_target_angle_ = angle_to_servo(angle);
@@ -69,8 +70,8 @@ void MotionPlanner::update_speed()
 {
     // 速度更新逻辑
     // 基于曲率和角速度估算加速度
-    const float k = max_speed * 0.7f;
-    speed = min(static_cast<float>(max_speed), k / (abs(angle) + 0.01f));
+    const float k = max_speed * 0.8f;
+    speed = min(static_cast<float>(max_speed), k / (min(abs(angle), 2.0f) + 0.01f));
 
     *output_target_speed_ = speed;
     *output_target_speed_accel_ = speed_accel;
@@ -137,6 +138,11 @@ std::tuple<Point2f, float, float> MotionPlanner::pure_pursuit(const TrackPath& p
     float x_r = target.x() - pos.x();
     float y_r = pos.y() - target.y();
     float curvature = actual_lookahead > 1e-6f ? x_r / (actual_lookahead) : 0;
+    // y_r=lookahead时curvature*=1，y_r=0时curvature*=1.2，线性插值
+    float k = 1.2f - 0.2f * (y_r / lookahead);
+    if (k < 1.0f) k = 1.0f;
+    if (k > 1.2f) k = 1.2f;
+    curvature *= k;
 
     // // 二倍前瞻点，使用主前瞻点实际距离的2倍
     // float actual_lookahead2 = 0.0f;
@@ -152,6 +158,8 @@ void MotionPlanner::setup_debug_vars()
 {
     add_debug_var("speed_base", make_debug_var("speed_base", &max_speed));
     add_debug_var("LRoundDir", make_debug_var("LRoundDir", &left_round_dir));
-    add_debug_var("LRoundDir", make_debug_var("RRoundDir", &right_round_dir));
+    add_debug_var("RRoundDir", make_debug_var("RRoundDir", &right_round_dir));
     add_debug_var("RoundTime", make_debug_var("RoundTime", &max_roundabout_remain_time));
+    add_debug_var("anglek1", make_debug_var("anglek1", &anglek1));
+    add_debug_var("anglek2", make_debug_var("anglek2", &anglek2));
 }

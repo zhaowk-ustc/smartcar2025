@@ -57,10 +57,17 @@ void MotionController::reset()
 
 void MotionController::update()
 {
-    target_speed = *input_speed_;
-    target_speed_accel = input_speed_accel_ ? *input_speed_accel_ : 0.0f;
-    target_direction = *input_direction_;
-    target_direction_accel = input_direction_accel_ ? *input_direction_accel_ : 0.0f;
+    if (*input_last_updated_ == true)
+    {
+        target_speed = *input_speed_;
+        target_speed_accel = input_speed_accel_ ? *input_speed_accel_ : 0.0f;
+        target_direction = *input_direction_;
+        target_direction_accel = input_direction_accel_ ? *input_direction_accel_ : 0.0f;
+    }
+    else
+    {
+        target_direction += target_direction_accel * 0.3f; // 10ms更新一次
+    }
 
     left_encoder_.update();
     right_encoder_.update();
@@ -87,16 +94,17 @@ void MotionController::update()
     *output_global_yaw_ = global_yaw_;
 }
 
-void MotionController::connect_inputs(
-    const float* input_speed,
+void MotionController::connect_inputs(const float* input_speed,
     const float* input_speed_accel,
     const float* input_direction,
-    const float* input_direction_accel)
+    const float* input_direction_accel,
+    bool* updated)
 {
     input_speed_ = input_speed;
     input_speed_accel_ = input_speed_accel;
     input_direction_ = input_direction;
     input_direction_accel_ = input_direction_accel;
+    input_last_updated_ = updated;
 }
 
 void MotionController::connect_outputs(

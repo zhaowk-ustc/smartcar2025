@@ -39,21 +39,22 @@ private:
 
     bool in_roundabout_ = false; // 是否在环岛
     bool roundabout_direction_ = false; // 环岛行驶方向，false表示左转，true表示右转
-    int max_roundabout_remain_time = 40;
+    int max_roundabout_remain_time = 30;
     int roundabout_remain_time = 0;
-    float left_round_dir = -0.6f;
-    float right_round_dir = 0.45f;
+    int roundabout_protect_time = 0; // 环岛保护时间，单位为10ms
+    float left_round_dir = -6.5f;
+    float right_round_dir = 5.0f;
 
 
     void update_angle();
-    float base_lookahead = 25.0f; // 前瞻距离
+    float base_lookahead = 27.0f; // 前瞻距离
     float angle = 0.0f; // 主前瞻曲率
     float angle2 = 0.0f; // 3/4前瞻
     float actual_lookahead, actual_lookahead2;
     float angle_vel = 0.0f;
 
 
-    int max_speed = 140;
+    int max_speed = 150;
     float speed = 0.0f; // 目标速度
     float speed_accel = 0.0f; // 目标速度加速度
 
@@ -61,12 +62,15 @@ private:
     // Pure Pursuit 跟踪算法，输入路径、前瞻距离，输出主前瞻target点、主前瞻曲率、3/4前瞻曲率、实际主前瞻距离
     static std::tuple<Point2f, float, float> pure_pursuit(const TrackPath& path, float lookahead);
 
-    static float angle_to_servo(float angle)
+    float angle_to_servo(float angle)
     {
         // 左负右正
         // 把角度映射到(-1, 1)范围内
-        return angle + angle * abs(angle) * 0.4;
+        return angle * anglek1 + angle * abs(angle) * anglek2;
     }
+
+    float anglek1 = 1.10f;
+    float anglek2 = 0.4f;
 
 
     void update_speed();

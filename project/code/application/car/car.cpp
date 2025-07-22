@@ -9,7 +9,8 @@ Car::Car(const Car::Config& config)
         &target_speed,
         &target_speed_accel,
         &target_direction,
-        &target_direction_accel);
+        &target_direction_accel,
+        &last_updated);
     motion_controller.connect_outputs(
         &global_x,
         &global_y,
@@ -55,12 +56,14 @@ void Car::update_pit5ms()
 
 void Car::update_pit10ms()
 {
+    last_updated = false;
     update_multicore();
-    // if (motion_planner.update_count != vision_outputs_shared.update_count)
-    // {
+    if (motion_planner.update_count != vision_outputs_shared.update_count)
+    {
         motion_planner.update();
+        last_updated = true;
         motion_planner.update_count = vision_outputs_shared.update_count;
-    // }
+    }
 
     motion_controller.update();
 }

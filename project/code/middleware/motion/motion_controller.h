@@ -34,7 +34,8 @@ public:
     void connect_inputs(const float* input_speed,
         const float* input_speed_accel,
         const float* input_direction,
-        const float* input_direction_accel);
+        const float* input_direction_accel,
+        bool* updated);
 
     void connect_outputs(float* global_x,
         float* global_y,
@@ -88,6 +89,8 @@ private:
     float global_yaw_;
 
     void setup_debug_vars() override;
+
+    bool* input_last_updated_; // 上次更新标志
 
 };
 
