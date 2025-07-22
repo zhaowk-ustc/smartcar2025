@@ -15,6 +15,7 @@ enum class ElementType : int8_t
     LEFT_ROUNDABOUT, // 左侧环岛
     RIGHT_ROUNDABOUT, // 右侧环岛
     U_TURN,     // U型转弯
+    BREAKLINE,  // 断线
     UNCERTAIN,  // 不确定
 };
 

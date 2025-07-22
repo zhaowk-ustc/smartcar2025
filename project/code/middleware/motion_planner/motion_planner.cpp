@@ -18,15 +18,39 @@ void MotionPlanner::reset()
 void MotionPlanner::update()
 {
     planner_local_path = *input_path_;
-
+    if (breakline_protect_time > 0)
+    {
+        breakline_protect_time -= 1;
+    }
+    else
+    {
+        current_element_type = ElementType::NORMAL;
+    }
+    
+    detect_breakline();
     fix_path();
     update_element();
+    if (enable_breakline && is_breakline && miss_line)
+    {
+        current_element_type = ElementType::BREAKLINE;
+        breakline_protect_time = max_breakline_protect_time;
+        // current_element_point = planner_local_path.end();
+    }
+
     update_angle();
     update_speed();
+
+    vision_config_shared.element_type = current_element_type;
 }
 
 void MotionPlanner::update_angle()
 {
+    if (current_element_type == ElementType::BREAKLINE)
+    {
+        *output_target_angle_ = angle_to_servo(breakline_dir);
+        *output_target_angle_vel_ = 0.0f;
+        return;
+    }
 
     if (miss_line == true)
     {
@@ -41,10 +65,10 @@ void MotionPlanner::update_angle()
         switch (roundabout_direction_)
         {
             case false:
-                angle = left_round_dir/10.0f;
+                angle = left_round_dir / 10.0f;
                 break;
             case true:
-                angle = right_round_dir/10.0f;
+                angle = right_round_dir / 10.0f;
                 break;
             default:
                 break;
@@ -68,6 +92,12 @@ void MotionPlanner::update_angle()
 
 void MotionPlanner::update_speed()
 {
+    if (current_element_type == ElementType::BREAKLINE)
+    {
+        *output_target_speed_ = max_speed * 0.6f; // 在断线时降低速度
+        *output_target_speed_accel_ = 0.0f; // 在断线
+        return;
+    }
     // 速度更新逻辑
     // 基于曲率和角速度估算加速度
     const float k = max_speed * 0.8f;
@@ -160,6 +190,8 @@ void MotionPlanner::setup_debug_vars()
     add_debug_var("LRoundDir", make_debug_var("LRoundDir", &left_round_dir));
     add_debug_var("RRoundDir", make_debug_var("RRoundDir", &right_round_dir));
     add_debug_var("RoundTime", make_debug_var("RoundTime", &max_roundabout_remain_time));
+    add_debug_var("lookahead", make_debug_var("lookahead", &base_lookahead));
+    add_debug_var("brklineEn", make_debug_var("brklineEn", &enable_breakline));
     add_debug_var("anglek1", make_debug_var("anglek1", &anglek1));
     add_debug_var("anglek2", make_debug_var("anglek2", &anglek2));
 }

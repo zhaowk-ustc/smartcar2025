@@ -28,10 +28,16 @@ private:
     TrackPath planner_local_path;
     // TrackPath planner_global_path_tmp;
 
+    bool detect_breakline();
+    bool enable_breakline = false; // 是否启用断线检测
     void fix_path();
     void update_element();
 
     bool miss_line = false; // 是否偏离路径
+    bool is_breakline;
+    int breakline_protect_time = 0; // 断线保护时间，单位为10ms
+    int max_breakline_protect_time = 100; // 最大断线保护时间
+    float breakline_dir = 0;
 
     ElementType current_element_type = ElementType::NORMAL; // 当前元素类型
     Point2f current_element_point; // 当前元素的关键点

@@ -19,6 +19,7 @@ struct VisionConfigShared
 {
     bool fixed_threshold_enable = false;
     int fixed_threshold;
+    ElementType element_type = ElementType::NORMAL;
 };
 
 struct VisionOutputsShared

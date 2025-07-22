@@ -37,7 +37,7 @@ void MotionPlanner::fix_path()
             break;
         }
 
-        
+
         // 新增：环岛保护期内检测到环岛，替换为30度射线
         if (roundabout_protect_time > 0 && roundabout_remain_time == 0 &&
             (planner_local_path.nodes[i + 1].element == ElementType::LEFT_ROUNDABOUT || planner_local_path.nodes[i + 1].element == ElementType::RIGHT_ROUNDABOUT))
@@ -143,4 +143,20 @@ void MotionPlanner::update_element()
         default:
             break;
     }
+}
+
+bool MotionPlanner::detect_breakline()
+{
+    if (planner_local_path.size() < 2) return false;
+    Point2f end = planner_local_path.end();
+    if (
+        end.y() > 0.2 * calibrated_height && end.y() < 0.7 * calibrated_height
+        && end.x() > 0.2 * calibrated_width && end.x() < 0.8 * calibrated_width
+        )
+    {
+        is_breakline = true;
+        return true;
+    }
+    // is_breakline = false;
+    return false;
 }
