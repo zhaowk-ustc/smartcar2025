@@ -82,11 +82,12 @@ void Car::setup_debug_vars()
     ui.export_debug_vars(&debugger, "");
 
     // 添加调试变量
-    add_debug_var("target_speed", make_debug_var("target_speed", &target_speed));
+    add_debug_var("targetSpd", make_debug_var("targetSpd", &target_speed));
     // add_debug_var("target_speed_accel", make_debug_var("target_speed_accel", &target_speed_accel));
-    add_debug_var("target_direction", make_readonly_var("target_direction", &target_direction));
+    add_debug_var("targetDir", make_readonly_var("targetDir", &target_direction));
     // add_debug_var("target_direction_accel", make_debug_var("target_direction_accel", &target_direction_accel));
-
+    add_debug_var("FixedThreEn", make_debug_var("FixedThreEn", &vision_config_shared.fixed_threshold_enable));
+    add_debug_var("FixedThre", make_debug_var("FixedThre", &vision_config_shared.fixed_threshold));
     // 导出到 Debugger
     export_debug_vars(&debugger, "");
 
@@ -99,5 +100,6 @@ void Car::update_multicore()
 {
     SCB_InvalidateDCache_by_Addr((void*)&vision_outputs_shared, sizeof(vision_outputs_shared));
     memcpy(&car_path, &vision_outputs_shared.track_path, sizeof(TrackPath));
+    SCB_CleanDCache_by_Addr((void*)&vision_config_shared, sizeof(vision_config_shared));
 
 }

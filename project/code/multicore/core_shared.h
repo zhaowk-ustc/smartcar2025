@@ -17,8 +17,8 @@ extern int16_t vision_point_to_node_map[aligned_calibrated_size];
 
 struct VisionConfigShared
 {
-    // 这里可以添加相机配置参数
-    // 例如：分辨率、帧率等
+    bool fixed_threshold_enable = false;
+    int fixed_threshold;
 };
 
 struct VisionOutputsShared
